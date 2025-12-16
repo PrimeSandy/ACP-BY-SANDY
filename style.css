@@ -122,3 +122,93 @@ body {
         margin-bottom: 0.5rem;
     }
 }
+
+/* Notification Styles */
+.global-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1060;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Status Badge Colors */
+.badge.bg-sent { background-color: #6c757d !important; }
+.badge.bg-delivered { background-color: #0dcaf0 !important; }
+.badge.bg-viewed { background-color: #0d6efd !important; }
+.badge.bg-approved { background-color: #198754 !important; }
+.badge.bg-query_raised { background-color: #ffc107 !important; color: #000 !important; }
+
+/* Query Timeline */
+.query-timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.query-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.query-timeline-item {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.query-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -23px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #0d6efd;
+}
+
+/* Enhanced Schedule Card */
+.schedule-card {
+    transition: all 0.2s;
+    border: 1px solid #dee2e6;
+}
+
+.schedule-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* Time Display */
+.time-display {
+    background: #f8f9fa;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+/* Badge Colors */
+.badge.bg-secondary { background-color: #6c757d !important; }
+.badge.bg-info { background-color: #0dcaf0 !important; }
+.badge.bg-primary { background-color: #0d6efd !important; }
+.badge.bg-success { background-color: #198754 !important; }
+.badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
