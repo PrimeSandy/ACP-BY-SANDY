@@ -1,0 +1,124 @@
+/* Main Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.login-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Dashboard Cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Status Indicators */
+.status-sent { color: #28a745; }
+.status-delivered { color: #17a2b8; }
+.status-viewed { color: #007bff; }
+.status-approved { color: #20c997; }
+.status-query { color: #dc3545; }
+
+/* Schedule Cards */
+.schedule-card {
+    border-left: 4px solid #007bff;
+    margin-bottom: 1rem;
+}
+
+.schedule-card.approved {
+    border-left-color: #28a745;
+}
+
+.schedule-card.query {
+    border-left-color: #dc3545;
+}
+
+/* Query Bubble */
+.query-bubble {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin: 5px 0;
+    border: 1px solid #dee2e6;
+}
+
+.query-bubble.faculty {
+    background-color: #e3f2fd;
+    margin-left: 20px;
+}
+
+.query-bubble.admin {
+    background-color: #f3e5f5;
+    margin-right: 20px;
+}
+
+/* Calendar */
+.calendar-day {
+    border: 1px solid #dee2e6;
+    height: 120px;
+    overflow-y: auto;
+}
+
+.calendar-day.today {
+    background-color: #e7f3ff;
+}
+
+.calendar-event {
+    font-size: 0.8rem;
+    padding: 2px 5px;
+    margin: 2px 0;
+    border-radius: 3px;
+    background-color: #d4edda;
+    border-left: 3px solid #28a745;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.user-badge {
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* Modal */
+.modal-header {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Status Icons */
+.status-icon {
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .calendar-day {
+        height: 100px;
+    }
+    
+    .schedule-card {
+        margin-bottom: 0.5rem;
+    }
+}

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Academic Schedule Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-calendar-check"></i> Admin Dashboard
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="user-badge text-dark me-3">
+                    <i class="bi bi-person-fill"></i> <span id="adminName">Loading...</span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-plus-circle"></i> Create New Schedule
+                    </div>
+                    <div class="card-body">
+                        <form id="scheduleForm">
+                            <div class="mb-3">
+                                <label class="form-label">Faculty Email</label>
+                                <input type="email" class="form-control" id="facultyEmail" required 
+                                       placeholder="faculty@college.edu">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="subject" required 
+                                       placeholder="e.g., Data Structures">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Class/Group</label>
+                                <input type="text" class="form-control" id="className" required 
+                                       placeholder="e.g., CSE-A, 3rd Year">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" id="scheduleDate" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" id="startTime" required>
+                                </div>
+                                <div class="col">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" class="form-control" id="endTime" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-send"></i> Create & Send Schedule
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-people"></i> User Management
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="email" class="form-control" id="searchUser" 
+                                   placeholder="Search by email">
+                        </div>
+                        <div id="usersList" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Users will be loaded here -->
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <ul class="nav nav-tabs" id="adminTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#allSchedules">
+                            <i class="bi bi-list-ul"></i> All Schedules
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#queries">
+                            <i class="bi bi-question-circle"></i> Faculty Queries
+                            <span class="badge bg-danger" id="queryBadge">0</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-3">
+                    <!-- All Schedules Tab -->
+                    <div class="tab-pane fade show active" id="allSchedules">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">All Schedules</h5>
+                                    <select class="form-select form-select-sm w-auto" id="statusFilter">
+                                        <option value="all">All Status</option>
+                                        <option value="sent">Sent</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="viewed">Viewed</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="query_raised">Queries</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="schedulesContainer">
+                                    <!-- Schedules will be loaded here -->
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Queries Tab -->
+                    <div class="tab-pane fade" id="queries">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Faculty Queries</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="queriesContainer">
+                                    <!-- Queries will be loaded here -->
+                                    <div class="text-center py-5">
+                                        <p class="text-muted">No pending queries</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase and Admin JS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALXM9g6HkFHuHLYNXjZ417_9d6bkPGatc",
+            authDomain: "tracker-pts.firebaseapp.com",
+            projectId: "tracker-pts",
+            storageBucket: "tracker-pts.firebasestorage.app",
+            messagingSenderId: "237919442573",
+            appId: "1:237919442573:web:e3abad42a0a1f49f5334c4",
+            measurementId: "G-R5K7KNKMYS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check if user is admin
+        if (localStorage.getItem('userRole') !== 'admin') {
+            alert('Access denied. Admins only.');
+            window.location.href = 'index.html';
+        }
+
+        // Set admin name
+        document.getElementById('adminName').textContent = localStorage.getItem('userName') || 'Admin';
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
+        });
+
+        // Load users
+        async function loadUsers() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm"></div></div>';
+            
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                usersList.innerHTML = '';
+                
+                usersSnapshot.forEach((userDoc) => {
+                    const user = userDoc.data();
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'd-flex justify-content-between align-items-center p-2 border-bottom';
+                    userDiv.innerHTML = `
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <small class="text-muted">${user.email}</small>
+                        </div>
+                        <select class="form-select form-select-sm role-select" data-uid="${userDoc.id}" style="width: 100px;">
+                            <option value="faculty" ${user.role === 'faculty' ? 'selected' : ''}>Faculty</option>
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    `;
+                    usersList.appendChild(userDiv);
+                });
+                
+                // Add event listeners to role selects
+                document.querySelectorAll('.role-select').forEach(select => {
+                    select.addEventListener('change', async (e) => {
+                        const uid = e.target.dataset.uid;
+                        const newRole = e.target.value;
+                        
+                        // Prevent removing last admin
+                        if (newRole === 'faculty') {
+                            const adminUsers = await getDocs(query(collection(db, 'users'), where('role', '==', 'admin')));
+                            if (adminUsers.size <= 1) {
+                                alert('Cannot change role: At least one admin must exist in the system.');
+                                e.target.value = 'admin';
+                                return;
+                            }
+                        }
+                        
+                        try {
+                            await updateDoc(doc(db, 'users', uid), { role: newRole });
+                            alert('User role updated successfully');
+                        } catch (error) {
+                            console.error("Error updating role:", error);
+                            alert('Failed to update role');
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error("Error loading users:", error);
+                usersList.innerHTML = '<div class="text-danger">Error loading users</div>';
+            }
+        }
+
+        // Create schedule
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const facultyEmail = document.getElementById('facultyEmail').value;
+            const subject = document.getElementById('subject').value;
+            const className = document.getElementById('className').value;
+            const scheduleDate = document.getElementById('scheduleDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            // Get faculty user by email
+            try {
+                const usersSnapshot = await getDocs(query(collection(db, 'users'), where('email', '==', facultyEmail)));
+                if (usersSnapshot.empty) {
+                    alert('Faculty not found. Please check the email address.');
+                    return;
+                }
+                
+                const facultyUser = usersSnapshot.docs[0].data();
+                
+                const scheduleData = {
+                    facultyEmail: facultyEmail,
+                    facultyName: facultyUser.name,
+                    facultyId: usersSnapshot.docs[0].id,
+                    subject: subject,
+                    className: className,
+                    date: scheduleDate,
+                    startTime: startTime,
+                    endTime: endTime,
+                    status: 'sent',
+                    createdBy: auth.currentUser.uid,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    queries: []
+                };
+                
+                await addDoc(collection(db, 'schedules'), scheduleData);
+                
+                // Reset form
+                document.getElementById('scheduleForm').reset();
+                alert('Schedule created and sent successfully!');
+                
+            } catch (error) {
+                console.error("Error creating schedule:", error);
+                alert('Failed to create schedule: ' + error.message);
+            }
+        });
+
+        // Load schedules
+        let unsubscribeSchedules;
+        function loadSchedules() {
+            const container = document.getElementById('schedulesContainer');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            if (unsubscribeSchedules) unsubscribeSchedules();
+            
+            let q = collection(db, 'schedules');
+            
+            unsubscribeSchedules = onSnapshot(q, (snapshot) => {
+                container.innerHTML = '';
+                
+                snapshot.docs.forEach((doc) => {
+                    const schedule = { id: doc.id, ...doc.data() };
+                    
+                    // Apply status filter
+                    if (statusFilter.value !== 'all' && schedule.status !== statusFilter.value) {
+                        return;
+                    }
+                    
+                    const scheduleDiv = document.createElement('div');
+                    scheduleDiv.className = `schedule-card card p-3 mb-3 ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
+                    
+                    // Status icon mapping
+                    const statusIcons = {
+                        sent: '✔️',
+                        delivered: '✔️✔️',
+                        viewed: '🔵',
+                        approved: '✅',
+                        query_raised: '❗'
+                    };
+                    
+                    scheduleDiv.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6>${schedule.subject}</h6>
+                                <p class="mb-1"><strong>Class:</strong> ${schedule.className}</p>
+                                <p class="mb-1"><strong>Faculty:</strong> ${schedule.facultyName} (${schedule.facultyEmail})</p>
+                                <p class="mb-1"><strong>Date:</strong> ${schedule.date} | ${schedule.startTime} - ${schedule.endTime}</p>
+                                <p class="mb-0"><strong>Status:</strong> ${statusIcons[schedule.status] || schedule.status}</p>
+                            </div>
+                            <div>
+                                <span class="badge bg-${schedule.status === 'approved' ? 'success' : schedule.status === 'query_raised' ? 'danger' : 'primary'}">
+                                    ${schedule.status}
+                                </span>
+                            </div>
+                        </div>
+                        ${schedule.queries && schedule.queries.length > 0 ? `
+                            <div class="mt-3">
+                                <h6><i class="bi bi-question-circle"></i> Queries:</h6>
+                                ${schedule.queries.map((q, index) => `
+                                    <div class="query-bubble ${q.sender === 'faculty' ? 'faculty' : 'admin'}">
+                                        <strong>${q.sender === 'faculty' ? schedule.facultyName : 'Admin'}:</strong>
+                                        ${q.message}
+                                        <div class="text-muted small">${new Date(q.timestamp).toLocaleString()}</div>
+                                    </div>
+                                `).join('')}
+                                ${schedule.status === 'query_raised' ? `
+                                    <div class="mt-2">
+                                        <textarea class="form-control form-control-sm" id="response-${schedule.id}" placeholder="Type your response..."></textarea>
+                                        <button class="btn btn-sm btn-primary mt-1" onclick="sendResponse('${schedule.id}')">Send Response</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    container.appendChild(scheduleDiv);
+                });
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="text-center py-5"><p class="text-muted">No schedules found</p></div>';
+                }
+            });
+        }
+
+        // Send response to query
+        window.sendResponse = async function(scheduleId) {
+            const responseText = document.getElementById(`response-${scheduleId}`).value;
+            if (!responseText.trim()) return;
+            
+            try {
+                const scheduleRef = doc(db, 'schedules', scheduleId);
+                const scheduleDoc = await getDoc(scheduleRef);
+                const schedule = scheduleDoc.data();
+                
+                const queries = schedule.queries || [];
+                queries.push({
+                    message: responseText,
+                    sender: 'admin',
+                    timestamp: new Date().toISOString()
+                });
+                
+                await updateDoc(scheduleRef, {
+                    queries: queries,
+                    status: 'viewed', // Change status after admin response
+                    updatedAt: new Date().toISOString()
+                });
+                
+                document.getElementById(`response-${scheduleId}`).value = '';
+                alert('Response sent successfully');
+            } catch (error) {
+                console.error("Error sending response:", error);
+                alert('Failed to send response');
+            }
+        };
+
+        // Load queries count
+        function loadQueriesCount() {
+            const queriesRef = collection(db, 'schedules');
+            const q = query(queriesRef, where('status', '==', 'query_raised'));
+            
+            onSnapshot(q, (snapshot) => {
+                const badge = document.getElementById('queryBadge');
+                badge.textContent = snapshot.size;
+                badge.style.display = snapshot.size > 0 ? 'inline' : 'none';
+            });
+        }
+
+        // Filter schedules by status
+        document.getElementById('statusFilter').addEventListener('change', loadSchedules);
+
+        // Search users
+        document.getElementById('searchUser').addEventListener('input', async (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const userItems = document.querySelectorAll('#usersList > div');
+            
+            userItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Initialize
+        loadUsers();
+        loadSchedules();
+        loadQueriesCount();
+
+        // Update date input with tomorrow's date as default
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('scheduleDate').valueAsDate = tomorrow;
+    </script>
+</body>
+</html>
