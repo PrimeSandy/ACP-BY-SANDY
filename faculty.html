@@ -7,6 +7,22 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .no-schedules {
+            text-align: center;
+            padding: 40px;
+        }
+        .no-schedules i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        .schedule-status {
+            font-size: 0.85rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -88,7 +104,7 @@
                         <h5 class="mb-0"><i class="bi bi-list-task me-2"></i> My Schedules</h5>
                         <div class="d-flex">
                             <input type="text" class="form-control form-control-sm me-2" id="searchSchedule" 
-                                   placeholder="Search by subject or class..." style="width: 200px;">
+                                   placeholder="Search schedules..." style="width: 200px;">
                             <select class="form-select form-select-sm" id="statusFilter" style="width: 150px;">
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
@@ -117,7 +133,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">My Approved Schedules Calendar</h5>
+                    <h5 class="modal-title"><i class="bi bi-calendar3 me-2"></i>My Approved Schedules</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -177,7 +193,16 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            collection, 
+            query, 
+            where, 
+            onSnapshot, 
+            updateDoc, 
+            doc, 
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyALXM9g6HkFHuHLYNXjZ417_9d6bkPGatc",
@@ -208,6 +233,7 @@
         let currentYear = new Date().getFullYear();
         let approvedSchedules = [];
         let unsubscribeSchedules = null;
+        let userId = localStorage.getItem('userId');
 
         // Show notification
         function showNotification(message, type = 'info', duration = 5000) {
@@ -224,7 +250,6 @@
             
             notificationArea.appendChild(notification);
             
-            // Auto remove after duration
             setTimeout(() => {
                 const notif = document.getElementById(notificationId);
                 if (notif) notif.remove();
@@ -243,9 +268,8 @@
             }
         });
 
-        // Load schedules for current faculty
+        // SIMPLIFIED VERSION - No complex queries
         function loadSchedules() {
-            const userId = localStorage.getItem('userId');
             const container = document.getElementById('schedulesContainer');
             
             if (!userId) {
@@ -255,10 +279,8 @@
 
             if (unsubscribeSchedules) unsubscribeSchedules();
             
-            const q = query(collection(db, 'schedules'), 
-                          where('facultyId', '==', userId),
-                          orderBy('date', 'desc'),
-                          orderBy('startTime', 'desc'));
+            // SIMPLE query - just get all schedules
+            const q = collection(db, 'schedules');
             
             unsubscribeSchedules = onSnapshot(q, async (snapshot) => {
                 container.innerHTML = '';
@@ -268,8 +290,8 @@
                 
                 if (snapshot.empty) {
                     container.innerHTML = `
-                        <div class="text-center py-5">
-                            <i class="bi bi-calendar-x display-4 text-muted"></i>
+                        <div class="no-schedules">
+                            <i class="bi bi-calendar-x"></i>
                             <h5 class="mt-3">No schedules assigned yet</h5>
                             <p class="text-muted">Wait for admin to assign you schedules</p>
                         </div>
@@ -279,21 +301,30 @@
                     return;
                 }
                 
-                // Process schedules
+                // Get all schedules and filter locally
                 const allSchedules = [];
-                const now = new Date();
                 
                 for (const docSnap of snapshot.docs) {
                     const schedule = { id: docSnap.id, ...docSnap.data() };
+                    
+                    // Only show schedules for this faculty
+                    if (schedule.facultyId !== userId) {
+                        continue;
+                    }
+                    
                     allSchedules.push(schedule);
                     
                     // Update delivered status for any 'sent' schedules
                     if (schedule.status === 'sent') {
-                        await updateDoc(doc(db, 'schedules', schedule.id), { 
-                            status: 'delivered',
-                            updatedAt: new Date().toISOString()
-                        });
-                        continue;
+                        try {
+                            await updateDoc(doc(db, 'schedules', schedule.id), { 
+                                status: 'delivered',
+                                updatedAt: new Date().toISOString()
+                            });
+                            schedule.status = 'delivered'; // Update local copy
+                        } catch (error) {
+                            console.error("Error updating status:", error);
+                        }
                     }
                     
                     // Update counts
@@ -305,14 +336,11 @@
                     }
                 }
                 
-                // Apply filters
+                // Apply filters locally
                 const searchTerm = document.getElementById('searchSchedule')?.value?.toLowerCase() || '';
                 const statusFilter = document.getElementById('statusFilter')?.value || 'all';
                 
                 let filteredSchedules = allSchedules.filter(schedule => {
-                    // Skip sent schedules (they're being updated)
-                    if (schedule.status === 'sent') return false;
-                    
                     // Apply search filter
                     if (searchTerm && !(
                         schedule.subject.toLowerCase().includes(searchTerm) ||
@@ -323,7 +351,7 @@
                     
                     // Apply status filter
                     if (statusFilter === 'pending') {
-                        return ['delivered', 'viewed', 'query_raised'].includes(schedule.status);
+                        return ['sent', 'delivered', 'viewed', 'query_raised'].includes(schedule.status);
                     } else if (statusFilter === 'approved') {
                         return schedule.status === 'approved';
                     } else if (statusFilter === 'query_raised') {
@@ -333,11 +361,18 @@
                     return true;
                 });
                 
-                // Display filtered schedules
+                // Sort by date and time
+                filteredSchedules.sort((a, b) => {
+                    const dateCompare = b.date.localeCompare(a.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    return b.startTime.localeCompare(a.startTime);
+                });
+                
+                // Display schedules
                 if (filteredSchedules.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-5">
-                            <i class="bi bi-search display-4 text-muted"></i>
+                        <div class="no-schedules">
+                            <i class="bi bi-search"></i>
                             <h5 class="mt-3">No matching schedules found</h5>
                             <p class="text-muted">Try changing your search or filter</p>
                         </div>
@@ -354,7 +389,17 @@
                 
             }, (error) => {
                 console.error("Error loading schedules:", error);
-                container.innerHTML = '<div class="text-center py-5"><p class="text-danger">Error loading schedules</p></div>';
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-exclamation-triangle display-4 text-danger"></i>
+                        <h5 class="mt-3">Error loading schedules</h5>
+                        <p class="text-muted">${error.message}</p>
+                        <button class="btn btn-primary mt-2" onclick="loadSchedules()">
+                            <i class="bi bi-arrow-clockwise"></i> Retry
+                        </button>
+                    </div>
+                `;
+                showNotification('Error loading schedules: ' + error.message, 'danger');
             });
         }
 
@@ -363,20 +408,16 @@
             const scheduleDiv = document.createElement('div');
             scheduleDiv.className = `schedule-card card p-3 mb-3 fade-in ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
             
-            // Status icons
-            const statusIcons = {
-                delivered: '📥',
-                viewed: '👁️',
-                approved: '✅',
-                query_raised: '❓'
+            // Status display
+            const statusInfo = {
+                sent: { icon: '📤', text: 'Sent', color: 'secondary' },
+                delivered: { icon: '📥', text: 'Delivered', color: 'info' },
+                viewed: { icon: '👁️', text: 'Viewed', color: 'primary' },
+                approved: { icon: '✅', text: 'Approved', color: 'success' },
+                query_raised: { icon: '❓', text: 'Query Raised', color: 'warning' }
             };
             
-            const statusTexts = {
-                delivered: 'Delivered',
-                viewed: 'Viewed',
-                approved: 'Approved',
-                query_raised: 'Query Raised'
-            };
+            const status = statusInfo[schedule.status] || { icon: '', text: schedule.status, color: 'secondary' };
             
             scheduleDiv.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start">
@@ -390,8 +431,8 @@
                         </p>
                         <p class="mb-0">
                             <strong>Status:</strong> 
-                            <span class="badge bg-${schedule.status.replace('_', '')} ms-2">
-                                ${statusIcons[schedule.status] || ''} ${statusTexts[schedule.status] || schedule.status}
+                            <span class="badge bg-${status.color} ms-2">
+                                ${status.icon} ${status.text}
                             </span>
                         </p>
                     </div>
@@ -460,26 +501,23 @@
                 return;
             }
             
-            // Sort by updatedAt and take last 5
-            const sorted = schedules
-                .filter(s => s.status !== 'sent') // Exclude sent schedules
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 5);
+            // Take last 5 activities
+            const recent = schedules.slice(-5).reverse();
             
-            sorted.forEach(schedule => {
+            recent.forEach(schedule => {
                 const activityItem = document.createElement('div');
                 activityItem.className = 'border-bottom pb-2 mb-2';
-                const timeAgo = getTimeAgo(new Date(schedule.updatedAt));
+                const timeAgo = getTimeAgo(new Date(schedule.updatedAt || schedule.createdAt));
                 const statusIcon = schedule.status === 'approved' ? '✅' : 
                                  schedule.status === 'query_raised' ? '❓' : '📋';
                 
                 activityItem.innerHTML = `
                     <div class="small">
                         <div class="d-flex justify-content-between">
-                            <strong>${schedule.subject}</strong>
+                            <strong class="text-truncate" style="max-width: 70%;">${schedule.subject}</strong>
                             <span>${statusIcon}</span>
                         </div>
-                        <div class="text-truncate text-muted" style="max-width: 100%;">${schedule.className}</div>
+                        <div class="text-muted">${schedule.className}</div>
                         <small class="text-muted">${timeAgo}</small>
                     </div>
                 `;
@@ -644,7 +682,6 @@
                             <div class="calendar-event mt-1">
                                 <div class="fw-bold small">${schedule.subject}</div>
                                 <div class="text-muted x-small">${schedule.startTime}-${schedule.endTime}</div>
-                                <div class="text-muted x-small">${schedule.className}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -694,13 +731,13 @@
         // Refresh schedules
         window.refreshSchedules = function() {
             loadSchedules();
-            showNotification('Refreshing schedules...', 'info', 2000);
+            showNotification('Schedules refreshed', 'info', 2000);
         };
 
         // Initialize
         loadSchedules();
         
-        // Check for new schedules every 30 seconds
+        // Auto refresh every 30 seconds
         setInterval(() => {
             loadSchedules();
         }, 30000);
