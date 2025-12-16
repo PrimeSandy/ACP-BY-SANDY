@@ -10,21 +10,24 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <i class="bi bi-person-circle"></i> Faculty Dashboard
+                <i class="bi bi-person-circle me-2"></i> Faculty Dashboard
             </a>
             <div class="d-flex align-items-center">
                 <span class="user-badge text-dark me-3">
-                    <i class="bi bi-person-fill"></i> <span id="facultyName">Loading...</span>
+                    <i class="bi bi-person-fill me-1"></i> <span id="facultyName">Loading...</span>
                 </span>
                 <button class="btn btn-outline-light btn-sm" id="logoutBtn">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
                 </button>
             </div>
         </div>
     </nav>
+
+    <!-- Notification Area -->
+    <div id="notificationArea"></div>
 
     <div class="container-fluid mt-4">
         <div class="row">
@@ -32,16 +35,16 @@
             <div class="col-lg-3">
                 <div class="card mb-3">
                     <div class="card-header bg-primary text-white">
-                        <i class="bi bi-info-circle"></i> My Stats
+                        <i class="bi bi-info-circle me-2"></i> My Stats
                     </div>
                     <div class="card-body">
                         <div class="row text-center">
                             <div class="col-6">
-                                <h3 id="pendingCount">0</h3>
+                                <h3 id="pendingCount" class="text-warning">0</h3>
                                 <small class="text-muted">Pending</small>
                             </div>
                             <div class="col-6">
-                                <h3 id="approvedCount">0</h3>
+                                <h3 id="approvedCount" class="text-success">0</h3>
                                 <small class="text-muted">Approved</small>
                             </div>
                         </div>
@@ -50,26 +53,25 @@
 
                 <div class="card mb-3">
                     <div class="card-header bg-info text-white">
-                        <i class="bi bi-calendar3"></i> Quick Actions
+                        <i class="bi bi-calendar3 me-2"></i> Quick Actions
                     </div>
                     <div class="card-body">
                         <button class="btn btn-outline-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#calendarModal">
-                            <i class="bi bi-calendar-month"></i> View Calendar
+                            <i class="bi bi-calendar-month me-2"></i> View Calendar
                         </button>
                         <button class="btn btn-outline-success w-100" onclick="refreshSchedules()">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                            <i class="bi bi-arrow-clockwise me-2"></i> Refresh
                         </button>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header bg-warning text-white">
-                        <i class="bi bi-clock-history"></i> Recent Activity
+                        <i class="bi bi-clock-history me-2"></i> Recent Activity
                     </div>
-                    <div class="card-body">
-                        <div id="recentActivity" style="max-height: 200px; overflow-y: auto;">
-                            <!-- Activity will be loaded here -->
-                            <div class="text-center">
+                    <div class="card-body p-0">
+                        <div id="recentActivity" style="max-height: 200px; overflow-y: auto; padding: 15px;">
+                            <div class="text-center py-3">
                                 <div class="spinner-border spinner-border-sm" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
@@ -82,20 +84,26 @@
             <!-- Main Content -->
             <div class="col-lg-9">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-list-task"></i> My Schedules</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-list-task me-2"></i> My Schedules</h5>
+                        <div class="d-flex">
+                            <input type="text" class="form-control form-control-sm me-2" id="searchSchedule" 
+                                   placeholder="Search by subject or class..." style="width: 200px;">
+                            <select class="form-select form-select-sm" id="statusFilter" style="width: 150px;">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="query_raised">Queries</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="searchSchedule" 
-                                   placeholder="Search by subject or class...">
-                        </div>
                         <div id="schedulesContainer">
-                            <!-- Schedules will be loaded here -->
                             <div class="text-center py-5">
                                 <div class="spinner-border" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
+                                <p class="mt-2 text-muted">Loading your schedules...</p>
                             </div>
                         </div>
                     </div>
@@ -113,11 +121,11 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <button class="btn btn-outline-primary" onclick="changeMonth(-1)">
                             <i class="bi bi-chevron-left"></i> Previous
                         </button>
-                        <h4 id="calendarMonth"></h4>
+                        <h4 id="calendarMonth" class="mb-0"></h4>
                         <button class="btn btn-outline-primary" onclick="changeMonth(1)">
                             Next <i class="bi bi-chevron-right"></i>
                         </button>
@@ -135,24 +143,28 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title">Raise Query</h5>
+                    <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Raise Query</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="queryScheduleId">
                     <div class="mb-3">
                         <label class="form-label">Schedule Details</label>
-                        <div id="scheduleDetails" class="p-2 bg-light rounded"></div>
+                        <div id="scheduleDetails" class="p-3 bg-light rounded">
+                            Loading schedule details...
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Query Message</label>
-                        <textarea class="form-control" id="queryMessage" rows="3" 
+                        <textarea class="form-control" id="queryMessage" rows="4" 
                                   placeholder="Describe the issue or conflict..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning" onclick="submitQuery()">Submit Query</button>
+                    <button type="button" class="btn btn-warning" onclick="submitQuery()">
+                        <i class="bi bi-send me-1"></i> Submit Query
+                    </button>
                 </div>
             </div>
         </div>
@@ -165,7 +177,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyALXM9g6HkFHuHLYNXjZ417_9d6bkPGatc",
@@ -195,6 +207,29 @@
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let approvedSchedules = [];
+        let unsubscribeSchedules = null;
+
+        // Show notification
+        function showNotification(message, type = 'info', duration = 5000) {
+            const notificationArea = document.getElementById('notificationArea');
+            const notificationId = 'notification-' + Date.now();
+            
+            const notification = document.createElement('div');
+            notification.id = notificationId;
+            notification.className = `alert alert-${type} alert-dismissible fade show global-notification`;
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" onclick="document.getElementById('${notificationId}').remove()"></button>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                const notif = document.getElementById(notificationId);
+                if (notif) notif.remove();
+            }, duration);
+        }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -204,6 +239,7 @@
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error("Logout error:", error);
+                showNotification('Logout failed', 'danger');
             }
         });
 
@@ -211,127 +247,201 @@
         function loadSchedules() {
             const userId = localStorage.getItem('userId');
             const container = document.getElementById('schedulesContainer');
-            const searchInput = document.getElementById('searchSchedule');
             
             if (!userId) {
                 container.innerHTML = '<div class="text-center py-5"><p class="text-danger">User not authenticated</p></div>';
                 return;
             }
 
-            const q = query(collection(db, 'schedules'), where('facultyId', '==', userId));
+            if (unsubscribeSchedules) unsubscribeSchedules();
             
-            const unsubscribe = onSnapshot(q, async (snapshot) => {
+            const q = query(collection(db, 'schedules'), 
+                          where('facultyId', '==', userId),
+                          orderBy('date', 'desc'),
+                          orderBy('startTime', 'desc'));
+            
+            unsubscribeSchedules = onSnapshot(q, async (snapshot) => {
                 container.innerHTML = '';
                 let pending = 0;
                 let approved = 0;
                 approvedSchedules = [];
                 
                 if (snapshot.empty) {
-                    container.innerHTML = '<div class="text-center py-5"><p class="text-muted">No schedules assigned yet</p></div>';
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x display-4 text-muted"></i>
+                            <h5 class="mt-3">No schedules assigned yet</h5>
+                            <p class="text-muted">Wait for admin to assign you schedules</p>
+                        </div>
+                    `;
                     updateCounts(0, 0);
+                    updateRecentActivity([]);
                     return;
                 }
                 
-                // Update delivered status for any 'sent' schedules
-                const updatePromises = [];
-                snapshot.docs.forEach(doc => {
-                    const schedule = doc.data();
+                // Process schedules
+                const allSchedules = [];
+                const now = new Date();
+                
+                for (const docSnap of snapshot.docs) {
+                    const schedule = { id: docSnap.id, ...docSnap.data() };
+                    allSchedules.push(schedule);
+                    
+                    // Update delivered status for any 'sent' schedules
                     if (schedule.status === 'sent') {
-                        updatePromises.push(updateDoc(doc.ref, { 
+                        await updateDoc(doc(db, 'schedules', schedule.id), { 
                             status: 'delivered',
                             updatedAt: new Date().toISOString()
-                        }));
+                        });
+                        continue;
                     }
-                });
-                
-                // Wait for all updates
-                await Promise.all(updatePromises);
-                
-                // Display schedules
-                snapshot.docs.forEach((doc) => {
-                    const schedule = { id: doc.id, ...doc.data() };
                     
                     // Update counts
                     if (schedule.status === 'approved') {
                         approved++;
                         approvedSchedules.push(schedule);
-                    } else if (['sent', 'delivered', 'viewed', 'query_raised'].includes(schedule.status)) {
+                    } else if (['delivered', 'viewed', 'query_raised'].includes(schedule.status)) {
                         pending++;
                     }
+                }
+                
+                // Apply filters
+                const searchTerm = document.getElementById('searchSchedule')?.value?.toLowerCase() || '';
+                const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+                
+                let filteredSchedules = allSchedules.filter(schedule => {
+                    // Skip sent schedules (they're being updated)
+                    if (schedule.status === 'sent') return false;
                     
-                    const scheduleDiv = document.createElement('div');
-                    scheduleDiv.className = `schedule-card card p-3 mb-3 ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
+                    // Apply search filter
+                    if (searchTerm && !(
+                        schedule.subject.toLowerCase().includes(searchTerm) ||
+                        schedule.className.toLowerCase().includes(searchTerm)
+                    )) {
+                        return false;
+                    }
                     
-                    // Status icon mapping
-                    const statusIcons = {
-                        sent: '✔️',
-                        delivered: '✔️✔️',
-                        viewed: '🔵',
-                        approved: '✅',
-                        query_raised: '❗'
-                    };
+                    // Apply status filter
+                    if (statusFilter === 'pending') {
+                        return ['delivered', 'viewed', 'query_raised'].includes(schedule.status);
+                    } else if (statusFilter === 'approved') {
+                        return schedule.status === 'approved';
+                    } else if (statusFilter === 'query_raised') {
+                        return schedule.status === 'query_raised';
+                    }
                     
-                    scheduleDiv.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6>${schedule.subject}</h6>
-                                <p class="mb-1"><strong>Class:</strong> ${schedule.className}</p>
-                                <p class="mb-1"><strong>Date:</strong> ${schedule.date}</p>
-                                <p class="mb-1"><strong>Time:</strong> ${schedule.startTime} - ${schedule.endTime}</p>
-                                <p class="mb-0"><strong>Status:</strong> ${statusIcons[schedule.status] || schedule.status}</p>
-                            </div>
-                            <div>
-                                <span class="badge bg-${schedule.status === 'approved' ? 'success' : schedule.status === 'query_raised' ? 'danger' : 'primary'}">
-                                    ${schedule.status}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        ${schedule.queries && schedule.queries.length > 0 ? `
-                            <div class="mt-3">
-                                <h6><i class="bi bi-question-circle"></i> Queries:</h6>
-                                ${schedule.queries.map((q, index) => `
-                                    <div class="query-bubble ${q.sender === 'faculty' ? 'faculty' : 'admin'}">
-                                        <strong>${q.sender === 'faculty' ? 'You' : 'Admin'}:</strong>
-                                        ${q.message}
-                                        <div class="text-muted small">${new Date(q.timestamp).toLocaleString()}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                        
-                        <div class="mt-3">
-                            ${schedule.status === 'approved' ? `
-                                <button class="btn btn-sm btn-success disabled">
-                                    <i class="bi bi-check-circle"></i> Approved
-                                </button>
-                            ` : schedule.status === 'query_raised' ? `
-                                <button class="btn btn-sm btn-warning disabled">
-                                    <i class="bi bi-hourglass-split"></i> Query Pending
-                                </button>
-                            ` : `
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-success" onclick="approveSchedule('${doc.id}')">
-                                        <i class="bi bi-check-lg"></i> Approve
-                                    </button>
-                                    <button class="btn btn-sm btn-warning" onclick="openQueryModal('${doc.id}')">
-                                        <i class="bi bi-question-circle"></i> Raise Query
-                                    </button>
-                                </div>
-                            `}
-                        </div>
-                    `;
-                    
-                    container.appendChild(scheduleDiv);
+                    return true;
                 });
                 
+                // Display filtered schedules
+                if (filteredSchedules.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="bi bi-search display-4 text-muted"></i>
+                            <h5 class="mt-3">No matching schedules found</h5>
+                            <p class="text-muted">Try changing your search or filter</p>
+                        </div>
+                    `;
+                } else {
+                    filteredSchedules.forEach(schedule => {
+                        const scheduleDiv = createScheduleCard(schedule);
+                        container.appendChild(scheduleDiv);
+                    });
+                }
+                
                 updateCounts(pending, approved);
-                updateRecentActivity(snapshot.docs);
-                filterSchedules(searchInput.value.toLowerCase());
+                updateRecentActivity(allSchedules);
+                
             }, (error) => {
                 console.error("Error loading schedules:", error);
                 container.innerHTML = '<div class="text-center py-5"><p class="text-danger">Error loading schedules</p></div>';
             });
+        }
+
+        // Create schedule card
+        function createScheduleCard(schedule) {
+            const scheduleDiv = document.createElement('div');
+            scheduleDiv.className = `schedule-card card p-3 mb-3 fade-in ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
+            
+            // Status icons
+            const statusIcons = {
+                delivered: '📥',
+                viewed: '👁️',
+                approved: '✅',
+                query_raised: '❓'
+            };
+            
+            const statusTexts = {
+                delivered: 'Delivered',
+                viewed: 'Viewed',
+                approved: 'Approved',
+                query_raised: 'Query Raised'
+            };
+            
+            scheduleDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex: 1;">
+                        <h6 class="mb-2">${schedule.subject}</h6>
+                        <p class="mb-1"><strong>Class:</strong> ${schedule.className}</p>
+                        <p class="mb-1"><strong>Date:</strong> ${schedule.date}</p>
+                        <p class="mb-1">
+                            <strong>Time:</strong> 
+                            <span class="time-display ms-1">${schedule.startTime} - ${schedule.endTime}</span>
+                        </p>
+                        <p class="mb-0">
+                            <strong>Status:</strong> 
+                            <span class="badge bg-${schedule.status.replace('_', '')} ms-2">
+                                ${statusIcons[schedule.status] || ''} ${statusTexts[schedule.status] || schedule.status}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                ${schedule.queries && schedule.queries.length > 0 ? `
+                    <div class="mt-3 border-top pt-3">
+                        <h6><i class="bi bi-chat-left-text me-2"></i>Discussion</h6>
+                        <div class="mt-2">
+                            ${schedule.queries.map((q, index) => `
+                                <div class="query-bubble ${q.sender === 'faculty' ? 'faculty' : 'admin'} mb-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <strong>${q.sender === 'faculty' ? 'You' : 'Admin'}</strong>
+                                        <small class="text-muted">${new Date(q.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+                                    </div>
+                                    <div>${q.message}</div>
+                                    <div class="text-end mt-1">
+                                        <small class="text-muted">${new Date(q.timestamp).toLocaleDateString()}</small>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="mt-3">
+                    ${schedule.status === 'approved' ? `
+                        <div class="d-flex align-items-center text-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <span>Approved on ${new Date(schedule.updatedAt).toLocaleDateString()}</span>
+                        </div>
+                    ` : schedule.status === 'query_raised' ? `
+                        <div class="d-flex align-items-center text-warning">
+                            <i class="bi bi-hourglass-split me-2"></i>
+                            <span>Waiting for admin response</span>
+                        </div>
+                    ` : `
+                        <div class="btn-group">
+                            <button class="btn btn-success" onclick="approveSchedule('${schedule.id}')">
+                                <i class="bi bi-check-lg me-1"></i> Approve
+                            </button>
+                            <button class="btn btn-warning" onclick="openQueryModal('${schedule.id}')">
+                                <i class="bi bi-question-circle me-1"></i> Raise Query
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `;
+            
+            return scheduleDiv;
         }
 
         // Update counts
@@ -341,29 +451,36 @@
         }
 
         // Update recent activity
-        function updateRecentActivity(docs) {
+        function updateRecentActivity(schedules) {
             const activityDiv = document.getElementById('recentActivity');
             activityDiv.innerHTML = '';
             
-            // Sort by updatedAt
-            const sorted = docs
-                .map(doc => ({ id: doc.id, ...doc.data() }))
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 5);
-            
-            if (sorted.length === 0) {
-                activityDiv.innerHTML = '<p class="text-muted small">No recent activity</p>';
+            if (!schedules || schedules.length === 0) {
+                activityDiv.innerHTML = '<p class="text-muted small text-center py-3">No recent activity</p>';
                 return;
             }
             
+            // Sort by updatedAt and take last 5
+            const sorted = schedules
+                .filter(s => s.status !== 'sent') // Exclude sent schedules
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .slice(0, 5);
+            
             sorted.forEach(schedule => {
                 const activityItem = document.createElement('div');
-                activityItem.className = 'mb-2';
+                activityItem.className = 'border-bottom pb-2 mb-2';
                 const timeAgo = getTimeAgo(new Date(schedule.updatedAt));
+                const statusIcon = schedule.status === 'approved' ? '✅' : 
+                                 schedule.status === 'query_raised' ? '❓' : '📋';
+                
                 activityItem.innerHTML = `
                     <div class="small">
-                        <strong>${schedule.subject}</strong><br>
-                        <span class="text-muted">${schedule.className} - ${timeAgo}</span>
+                        <div class="d-flex justify-content-between">
+                            <strong>${schedule.subject}</strong>
+                            <span>${statusIcon}</span>
+                        </div>
+                        <div class="text-truncate text-muted" style="max-width: 100%;">${schedule.className}</div>
+                        <small class="text-muted">${timeAgo}</small>
                     </div>
                 `;
                 activityDiv.appendChild(activityItem);
@@ -373,18 +490,18 @@
         // Time ago helper
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
-            let interval = seconds / 31536000;
+            if (seconds < 60) return "just now";
             
-            if (interval > 1) return Math.floor(interval) + " years ago";
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + " months ago";
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + " days ago";
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + " hours ago";
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + " minutes ago";
-            return "just now";
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days}d ago`;
+            
+            return date.toLocaleDateString();
         }
 
         // Approve schedule
@@ -396,10 +513,10 @@
                     status: 'approved',
                     updatedAt: new Date().toISOString()
                 });
-                alert('Schedule approved successfully!');
+                showNotification('Schedule approved successfully!', 'success');
             } catch (error) {
                 console.error("Error approving schedule:", error);
-                alert('Failed to approve schedule');
+                showNotification('Failed to approve schedule', 'danger');
             }
         };
 
@@ -411,9 +528,18 @@
                 
                 document.getElementById('queryScheduleId').value = scheduleId;
                 document.getElementById('scheduleDetails').innerHTML = `
-                    <strong>${schedule.subject}</strong><br>
-                    ${schedule.className} - ${schedule.date}<br>
-                    ${schedule.startTime} to ${schedule.endTime}
+                    <div class="mb-2">
+                        <strong>Subject:</strong> ${schedule.subject}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Class:</strong> ${schedule.className}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Date:</strong> ${schedule.date}
+                    </div>
+                    <div>
+                        <strong>Time:</strong> ${schedule.startTime} to ${schedule.endTime}
+                    </div>
                 `;
                 document.getElementById('queryMessage').value = '';
                 
@@ -427,7 +553,7 @@
                 modal.show();
             } catch (error) {
                 console.error("Error opening query modal:", error);
-                alert('Error loading schedule details');
+                showNotification('Error loading schedule details', 'danger');
             }
         };
 
@@ -437,7 +563,7 @@
             const message = document.getElementById('queryMessage').value.trim();
             
             if (!message) {
-                alert('Please enter a query message');
+                showNotification('Please enter a query message', 'warning');
                 return;
             }
             
@@ -459,12 +585,12 @@
                     updatedAt: new Date().toISOString()
                 });
                 
-                alert('Query submitted successfully! Admin will respond soon.');
+                showNotification('Query submitted successfully! Admin will respond soon.', 'success');
                 const modal = bootstrap.Modal.getInstance(document.getElementById('queryModal'));
                 modal.hide();
             } catch (error) {
                 console.error("Error submitting query:", error);
-                alert('Failed to submit query');
+                showNotification('Failed to submit query', 'danger');
             }
         };
 
@@ -482,26 +608,26 @@
             const totalDays = lastDay.getDate();
             const startingDay = firstDay.getDay();
             
-            // Generate calendar header
+            // Generate calendar
             let calendarHTML = `
-                <div class="row border-bottom">
-                    <div class="col p-2 text-center fw-bold">Sun</div>
+                <div class="row border-bottom bg-light">
+                    <div class="col p-2 text-center fw-bold text-danger">Sun</div>
                     <div class="col p-2 text-center fw-bold">Mon</div>
                     <div class="col p-2 text-center fw-bold">Tue</div>
                     <div class="col p-2 text-center fw-bold">Wed</div>
                     <div class="col p-2 text-center fw-bold">Thu</div>
                     <div class="col p-2 text-center fw-bold">Fri</div>
-                    <div class="col p-2 text-center fw-bold">Sat</div>
+                    <div class="col p-2 text-center fw-bold text-primary">Sat</div>
                 </div>
                 <div class="row">
             `;
             
-            // Add empty cells for days before first day
+            // Empty cells for days before first day
             for (let i = 0; i < startingDay; i++) {
                 calendarHTML += '<div class="col p-2 calendar-day"></div>';
             }
             
-            // Add days of the month
+            // Days of the month
             const today = new Date();
             for (let day = 1; day <= totalDays; day++) {
                 const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -511,27 +637,28 @@
                 calendarHTML += `
                     <div class="col p-2 calendar-day ${isToday ? 'today' : ''}">
                         <div class="d-flex justify-content-between">
-                            <strong>${day}</strong>
-                            <small class="text-muted">${daySchedules.length}</small>
+                            <strong class="${isToday ? 'text-primary' : ''}">${day}</strong>
+                            ${daySchedules.length > 0 ? `<span class="badge bg-success">${daySchedules.length}</span>` : ''}
                         </div>
                         ${daySchedules.map(schedule => `
-                            <div class="calendar-event small">
-                                ${schedule.subject}<br>
-                                <small>${schedule.startTime}-${schedule.endTime}</small>
+                            <div class="calendar-event mt-1">
+                                <div class="fw-bold small">${schedule.subject}</div>
+                                <div class="text-muted x-small">${schedule.startTime}-${schedule.endTime}</div>
+                                <div class="text-muted x-small">${schedule.className}</div>
                             </div>
                         `).join('')}
                     </div>
                 `;
                 
-                // Start new row after Saturday
+                // New row after Saturday
                 if ((startingDay + day) % 7 === 0 && day !== totalDays) {
                     calendarHTML += '</div><div class="row">';
                 }
             }
             
-            // Add empty cells for remaining days
+            // Empty cells for remaining days
             const totalCells = startingDay + totalDays;
-            const remainingCells = 42 - totalCells; // 6 weeks * 7 days
+            const remainingCells = 42 - totalCells;
             
             for (let i = 0; i < remainingCells; i++) {
                 calendarHTML += '<div class="col p-2 calendar-day"></div>';
@@ -560,26 +687,23 @@
             generateCalendar(currentMonth, currentYear);
         });
 
-        // Filter schedules
-        function filterSchedules(searchTerm) {
-            const schedules = document.querySelectorAll('#schedulesContainer > div');
-            schedules.forEach(schedule => {
-                const text = schedule.textContent.toLowerCase();
-                schedule.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        }
-
-        document.getElementById('searchSchedule').addEventListener('input', (e) => {
-            filterSchedules(e.target.value.toLowerCase());
-        });
+        // Search and filter
+        document.getElementById('searchSchedule')?.addEventListener('input', loadSchedules);
+        document.getElementById('statusFilter')?.addEventListener('change', loadSchedules);
 
         // Refresh schedules
         window.refreshSchedules = function() {
             loadSchedules();
+            showNotification('Refreshing schedules...', 'info', 2000);
         };
 
         // Initialize
         loadSchedules();
+        
+        // Check for new schedules every 30 seconds
+        setInterval(() => {
+            loadSchedules();
+        }, 30000);
     </script>
 </body>
 </html>
