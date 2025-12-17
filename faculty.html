@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,34 +8,96 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .no-schedules {
-            text-align: center;
-            padding: 40px;
+        .faculty-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
         }
-        .no-schedules i {
-            font-size: 4rem;
-            color: #6c757d;
-            margin-bottom: 20px;
+        
+        .quick-actions {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
         }
-        .schedule-status {
+        
+        .calendar-day {
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--secondary-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .calendar-day.today {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), transparent);
+            border-color: var(--accent-primary);
+        }
+        
+        .calendar-event {
+            background: linear-gradient(135deg, var(--accent-success), #059669);
+            color: white;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            margin-top: 6px;
             font-size: 0.85rem;
-            padding: 3px 8px;
-            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .calendar-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        .activity-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        
+        .activity-item:hover {
+            background: var(--glass-bg);
+            transform: translateX(5px);
+        }
+        
+        .schedule-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
         }
     </style>
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button class="theme-toggle-btn glass" id="themeToggle">
+            <i class="bi bi-sun-fill"></i>
+        </button>
+    </div>
+
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
+    <nav class="navbar glass">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-person-circle me-2"></i> Faculty Dashboard
+            <a class="navbar-brand gradient-text" href="#">
+                <div class="glass-icon" style="background: linear-gradient(135deg, var(--accent-success), #059669);">
+                    <i class="bi bi-person-circle text-white"></i>
+                </div>
+                Faculty Dashboard
             </a>
-            <div class="d-flex align-items-center">
-                <span class="user-badge text-dark me-3">
-                    <i class="bi bi-person-fill me-1"></i> <span id="facultyName">Loading...</span>
-                </span>
-                <button class="btn btn-outline-light btn-sm" id="logoutBtn">
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-badge glass">
+                    <div class="user-avatar me-2" style="background: linear-gradient(135deg, var(--accent-success), #059669);">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <div class="small" id="facultyName">Loading...</div>
+                        <div class="badge badge-success mt-1">FACULTY</div>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-sm" id="logoutBtn">
                     <i class="bi bi-box-arrow-right me-1"></i> Logout
                 </button>
             </div>
@@ -49,48 +111,49 @@
         <div class="row">
             <!-- Sidebar Stats -->
             <div class="col-lg-3">
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <i class="bi bi-info-circle me-2"></i> My Stats
+                <!-- Stats -->
+                <div class="faculty-stats">
+                    <div class="stats-card glass hover-lift">
+                        <div class="stats-value" id="pendingCount">0</div>
+                        <div class="stats-label">Pending Schedules</div>
+                    </div>
+                    <div class="stats-card glass hover-lift">
+                        <div class="stats-value" id="approvedCount">0</div>
+                        <div class="stats-label">Approved</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card glass hover-lift">
+                    <div class="card-header">
+                        <i class="bi bi-lightning-charge gradient-text"></i>
+                        Quick Actions
                     </div>
                     <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <h3 id="pendingCount" class="text-warning">0</h3>
-                                <small class="text-muted">Pending</small>
-                            </div>
-                            <div class="col-6">
-                                <h3 id="approvedCount" class="text-success">0</h3>
-                                <small class="text-muted">Approved</small>
-                            </div>
+                        <div class="quick-actions">
+                            <button class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#calendarModal">
+                                <i class="bi bi-calendar-month me-2"></i> View Calendar
+                            </button>
+                            <button class="btn btn-outline" onclick="refreshSchedules()">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Refresh
+                            </button>
+                            <button class="btn btn-outline" id="exportBtn">
+                                <i class="bi bi-download me-2"></i> Export Schedule
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mb-3">
-                    <div class="card-header bg-info text-white">
-                        <i class="bi bi-calendar3 me-2"></i> Quick Actions
-                    </div>
-                    <div class="card-body">
-                        <button class="btn btn-outline-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#calendarModal">
-                            <i class="bi bi-calendar-month me-2"></i> View Calendar
-                        </button>
-                        <button class="btn btn-outline-success w-100" onclick="refreshSchedules()">
-                            <i class="bi bi-arrow-clockwise me-2"></i> Refresh
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header bg-warning text-white">
-                        <i class="bi bi-clock-history me-2"></i> Recent Activity
+                <!-- Recent Activity -->
+                <div class="card glass hover-lift">
+                    <div class="card-header">
+                        <i class="bi bi-clock-history gradient-text"></i>
+                        Recent Activity
                     </div>
                     <div class="card-body p-0">
-                        <div id="recentActivity" style="max-height: 200px; overflow-y: auto; padding: 15px;">
-                            <div class="text-center py-3">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
+                        <div id="recentActivity" style="max-height: 250px; overflow-y: auto;">
+                            <div class="text-center py-4">
+                                <div class="loading-spinner"></div>
                             </div>
                         </div>
                     </div>
@@ -99,13 +162,21 @@
 
             <!-- Main Content -->
             <div class="col-lg-9">
-                <div class="card">
+                <div class="card glass">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-list-task me-2"></i> My Schedules</h5>
-                        <div class="d-flex">
-                            <input type="text" class="form-control form-control-sm me-2" id="searchSchedule" 
-                                   placeholder="Search schedules..." style="width: 200px;">
-                            <select class="form-select form-select-sm" id="statusFilter" style="width: 150px;">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-week me-2 gradient-text"></i>
+                            My Schedules
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <div class="input-group" style="width: 200px;">
+                                <input type="text" class="form-control glass-light" id="searchSchedule" 
+                                       placeholder="Search schedules...">
+                                <button class="btn btn-outline" type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <select class="form-select glass-light" id="statusFilter" style="width: 150px;">
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
                                 <option value="approved">Approved</option>
@@ -116,10 +187,8 @@
                     <div class="card-body">
                         <div id="schedulesContainer">
                             <div class="text-center py-5">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="mt-2 text-muted">Loading your schedules...</p>
+                                <div class="loading-spinner"></div>
+                                <p class="mt-3 text-muted">Loading your schedules...</p>
                             </div>
                         </div>
                     </div>
@@ -131,18 +200,20 @@
     <!-- Calendar Modal -->
     <div class="modal fade" id="calendarModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-calendar3 me-2"></i>My Approved Schedules</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content glass">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title gradient-text">
+                        <i class="bi bi-calendar3 me-2"></i>My Approved Schedules
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <button class="btn btn-outline-primary" onclick="changeMonth(-1)">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <button class="btn btn-outline" onclick="changeMonth(-1)">
                             <i class="bi bi-chevron-left"></i> Previous
                         </button>
-                        <h4 id="calendarMonth" class="mb-0"></h4>
-                        <button class="btn btn-outline-primary" onclick="changeMonth(1)">
+                        <h3 id="calendarMonth" class="mb-0 gradient-text"></h3>
+                        <button class="btn btn-outline" onclick="changeMonth(1)">
                             Next <i class="bi bi-chevron-right"></i>
                         </button>
                     </div>
@@ -157,27 +228,32 @@
     <!-- Query Modal -->
     <div class="modal fade" id="queryModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Raise Query</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content glass">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title gradient-text">
+                        <i class="bi bi-question-circle me-2"></i>Raise Query
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="queryScheduleId">
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label">Schedule Details</label>
-                        <div id="scheduleDetails" class="p-3 bg-light rounded">
-                            Loading schedule details...
+                        <div id="scheduleDetails" class="p-3 glass-light rounded">
+                            <div class="text-center">
+                                <div class="loading-spinner"></div>
+                                <p class="mt-2 mb-0">Loading schedule details...</p>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Query Message</label>
-                        <textarea class="form-control" id="queryMessage" rows="4" 
+                        <textarea class="form-control glass-light" id="queryMessage" rows="4" 
                                   placeholder="Describe the issue or conflict..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-warning" onclick="submitQuery()">
                         <i class="bi bi-send me-1"></i> Submit Query
                     </button>
@@ -214,14 +290,44 @@
             measurementId: "G-R5K7KNKMYS"
         };
 
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme') || (prefersDark.matches ? 'dark' : 'light');
+        
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeIcon.className = 'bi bi-moon-fill';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeIcon.className = 'bi bi-sun-fill';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'bi bi-moon-fill';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'bi bi-sun-fill';
+            }
+        });
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         // Check if user is faculty
         if (localStorage.getItem('userRole') !== 'faculty') {
-            alert('Access denied. Faculty only.');
-            window.location.href = 'index.html';
+            showNotification('Access denied. Faculty only.', 'danger');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
         }
 
         // Set faculty name
@@ -242,18 +348,47 @@
             
             const notification = document.createElement('div');
             notification.id = notificationId;
-            notification.className = `alert alert-${type} alert-dismissible fade show global-notification`;
+            notification.className = `notification fade-in`;
             notification.innerHTML = `
-                ${message}
+                <div class="glass-icon" style="${getNotificationColor(type)}">
+                    <i class="bi ${getNotificationIcon(type)} text-white"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <p class="mb-0">${message}</p>
+                </div>
                 <button type="button" class="btn-close" onclick="document.getElementById('${notificationId}').remove()"></button>
             `;
             
-            notificationArea.appendChild(notification);
+            if (!notificationArea) {
+                const newNotificationArea = document.createElement('div');
+                newNotificationArea.id = 'notificationArea';
+                document.body.appendChild(newNotificationArea);
+            }
+            
+            document.getElementById('notificationArea').appendChild(notification);
             
             setTimeout(() => {
                 const notif = document.getElementById(notificationId);
                 if (notif) notif.remove();
             }, duration);
+        }
+
+        function getNotificationColor(type) {
+            switch(type) {
+                case 'success': return 'background: linear-gradient(135deg, var(--accent-success), #059669);';
+                case 'warning': return 'background: linear-gradient(135deg, var(--accent-warning), #d97706);';
+                case 'danger': return 'background: linear-gradient(135deg, var(--accent-danger), #dc2626);';
+                default: return 'background: linear-gradient(135deg, var(--accent-info), #2563eb);';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'bi-check-circle-fill';
+                case 'warning': return 'bi-exclamation-triangle-fill';
+                case 'danger': return 'bi-x-circle-fill';
+                default: return 'bi-info-circle-fill';
+            }
         }
 
         // Logout
@@ -268,12 +403,48 @@
             }
         });
 
-        // SIMPLIFIED VERSION - No complex queries
+        // Export functionality
+        document.getElementById('exportBtn')?.addEventListener('click', () => {
+            if (approvedSchedules.length === 0) {
+                showNotification('No approved schedules to export', 'warning');
+                return;
+            }
+            
+            const csvContent = "Subject,Class,Date,Start Time,End Time\n" +
+                approvedSchedules.map(s => 
+                    `"${s.subject}","${s.className}","${s.date}","${s.startTime}","${s.endTime}"`
+                ).join("\n");
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `my-schedules-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('Schedule exported successfully!', 'success');
+        });
+
+        // Load schedules
         function loadSchedules() {
             const container = document.getElementById('schedulesContainer');
             
             if (!userId) {
-                container.innerHTML = '<div class="text-center py-5"><p class="text-danger">User not authenticated</p></div>';
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-danger), #dc2626); margin: 0 auto;">
+                            <i class="bi bi-person-x text-white"></i>
+                        </div>
+                        <h5 class="mb-2">User not authenticated</h5>
+                        <p class="text-muted">Please log in again</p>
+                        <button class="btn btn-primary mt-2" onclick="window.location.href='index.html'">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
@@ -290,9 +461,11 @@
                 
                 if (snapshot.empty) {
                     container.innerHTML = `
-                        <div class="no-schedules">
-                            <i class="bi bi-calendar-x"></i>
-                            <h5 class="mt-3">No schedules assigned yet</h5>
+                        <div class="text-center py-5">
+                            <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); margin: 0 auto;">
+                                <i class="bi bi-calendar-x text-white"></i>
+                            </div>
+                            <h5 class="mb-2">No schedules assigned yet</h5>
                             <p class="text-muted">Wait for admin to assign you schedules</p>
                         </div>
                     `;
@@ -371,9 +544,11 @@
                 // Display schedules
                 if (filteredSchedules.length === 0) {
                     container.innerHTML = `
-                        <div class="no-schedules">
-                            <i class="bi bi-search"></i>
-                            <h5 class="mt-3">No matching schedules found</h5>
+                        <div class="text-center py-5">
+                            <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-info), #2563eb); margin: 0 auto;">
+                                <i class="bi bi-search text-white"></i>
+                            </div>
+                            <h5 class="mb-2">No matching schedules found</h5>
                             <p class="text-muted">Try changing your search or filter</p>
                         </div>
                     `;
@@ -391,11 +566,13 @@
                 console.error("Error loading schedules:", error);
                 container.innerHTML = `
                     <div class="text-center py-5">
-                        <i class="bi bi-exclamation-triangle display-4 text-danger"></i>
+                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-danger), #dc2626); margin: 0 auto;">
+                            <i class="bi bi-exclamation-triangle text-white"></i>
+                        </div>
                         <h5 class="mt-3">Error loading schedules</h5>
                         <p class="text-muted">${error.message}</p>
                         <button class="btn btn-primary mt-2" onclick="loadSchedules()">
-                            <i class="bi bi-arrow-clockwise"></i> Retry
+                            <i class="bi bi-arrow-clockwise me-1"></i> Retry
                         </button>
                     </div>
                 `;
@@ -406,32 +583,32 @@
         // Create schedule card
         function createScheduleCard(schedule) {
             const scheduleDiv = document.createElement('div');
-            scheduleDiv.className = `schedule-card card p-3 mb-3 fade-in ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
+            scheduleDiv.className = `schedule-card glass fade-in ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
             
             // Status display
             const statusInfo = {
-                sent: { icon: '📤', text: 'Sent', color: 'secondary' },
-                delivered: { icon: '📥', text: 'Delivered', color: 'info' },
-                viewed: { icon: '👁️', text: 'Viewed', color: 'primary' },
-                approved: { icon: '✅', text: 'Approved', color: 'success' },
-                query_raised: { icon: '❓', text: 'Query Raised', color: 'warning' }
+                sent: { icon: '📤', text: 'Sent', color: 'badge-sent' },
+                delivered: { icon: '📥', text: 'Delivered', color: 'badge-delivered' },
+                viewed: { icon: '👁️', text: 'Viewed', color: 'badge-viewed' },
+                approved: { icon: '✅', text: 'Approved', color: 'badge-approved' },
+                query_raised: { icon: '❓', text: 'Query Raised', color: 'badge-query_raised' }
             };
             
-            const status = statusInfo[schedule.status] || { icon: '', text: schedule.status, color: 'secondary' };
+            const status = statusInfo[schedule.status] || { icon: '', text: schedule.status, color: 'badge-sent' };
             
             scheduleDiv.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start">
                     <div style="flex: 1;">
-                        <h6 class="mb-2">${schedule.subject}</h6>
+                        <h6 class="mb-2 gradient-text">${schedule.subject}</h6>
                         <p class="mb-1"><strong>Class:</strong> ${schedule.className}</p>
                         <p class="mb-1"><strong>Date:</strong> ${schedule.date}</p>
                         <p class="mb-1">
                             <strong>Time:</strong> 
-                            <span class="time-display ms-1">${schedule.startTime} - ${schedule.endTime}</span>
+                            <span class="badge glass-light ms-1">${schedule.startTime} - ${schedule.endTime}</span>
                         </p>
                         <p class="mb-0">
                             <strong>Status:</strong> 
-                            <span class="badge bg-${status.color} ms-2">
+                            <span class="badge ${status.color} ms-2">
                                 ${status.icon} ${status.text}
                             </span>
                         </p>
@@ -440,7 +617,7 @@
                 
                 ${schedule.queries && schedule.queries.length > 0 ? `
                     <div class="mt-3 border-top pt-3">
-                        <h6><i class="bi bi-chat-left-text me-2"></i>Discussion</h6>
+                        <h6><i class="bi bi-chat-left-text me-2 gradient-text"></i>Discussion</h6>
                         <div class="mt-2">
                             ${schedule.queries.map((q, index) => `
                                 <div class="query-bubble ${q.sender === 'faculty' ? 'faculty' : 'admin'} mb-2">
@@ -461,16 +638,20 @@
                 <div class="mt-3">
                     ${schedule.status === 'approved' ? `
                         <div class="d-flex align-items-center text-success">
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <div class="glass-icon me-2" style="background: linear-gradient(135deg, var(--accent-success), #059669);">
+                                <i class="bi bi-check-circle text-white"></i>
+                            </div>
                             <span>Approved on ${new Date(schedule.updatedAt).toLocaleDateString()}</span>
                         </div>
                     ` : schedule.status === 'query_raised' ? `
                         <div class="d-flex align-items-center text-warning">
-                            <i class="bi bi-hourglass-split me-2"></i>
+                            <div class="glass-icon me-2" style="background: linear-gradient(135deg, var(--accent-warning), #d97706);">
+                                <i class="bi bi-hourglass-split text-white"></i>
+                            </div>
                             <span>Waiting for admin response</span>
                         </div>
                     ` : `
-                        <div class="btn-group">
+                        <div class="schedule-actions">
                             <button class="btn btn-success" onclick="approveSchedule('${schedule.id}')">
                                 <i class="bi bi-check-lg me-1"></i> Approve
                             </button>
@@ -497,7 +678,14 @@
             activityDiv.innerHTML = '';
             
             if (!schedules || schedules.length === 0) {
-                activityDiv.innerHTML = '<p class="text-muted small text-center py-3">No recent activity</p>';
+                activityDiv.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="glass-icon mb-2" style="background: linear-gradient(135deg, var(--accent-info), #2563eb); margin: 0 auto;">
+                            <i class="bi bi-clock-history text-white"></i>
+                        </div>
+                        <p class="text-muted mb-0">No recent activity</p>
+                    </div>
+                `;
                 return;
             }
             
@@ -506,23 +694,44 @@
             
             recent.forEach(schedule => {
                 const activityItem = document.createElement('div');
-                activityItem.className = 'border-bottom pb-2 mb-2';
+                activityItem.className = 'activity-item';
                 const timeAgo = getTimeAgo(new Date(schedule.updatedAt || schedule.createdAt));
                 const statusIcon = schedule.status === 'approved' ? '✅' : 
                                  schedule.status === 'query_raised' ? '❓' : '📋';
                 
                 activityItem.innerHTML = `
-                    <div class="small">
-                        <div class="d-flex justify-content-between">
-                            <strong class="text-truncate" style="max-width: 70%;">${schedule.subject}</strong>
-                            <span>${statusIcon}</span>
+                    <div class="d-flex align-items-center">
+                        <div class="glass-icon me-3" style="background: ${getActivityColor(schedule.status)};">
+                            <i class="${getActivityIcon(schedule.status)} text-white"></i>
                         </div>
-                        <div class="text-muted">${schedule.className}</div>
-                        <small class="text-muted">${timeAgo}</small>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-truncate" style="max-width: 70%;">${schedule.subject}</strong>
+                                <small class="text-muted">${statusIcon}</small>
+                            </div>
+                            <div class="small text-muted">${schedule.className}</div>
+                            <small class="text-muted">${timeAgo}</small>
+                        </div>
                     </div>
                 `;
                 activityDiv.appendChild(activityItem);
             });
+        }
+
+        function getActivityColor(status) {
+            switch(status) {
+                case 'approved': return 'linear-gradient(135deg, var(--accent-success), #059669)';
+                case 'query_raised': return 'linear-gradient(135deg, var(--accent-warning), #d97706)';
+                default: return 'linear-gradient(135deg, var(--accent-info), #2563eb)';
+            }
+        }
+
+        function getActivityIcon(status) {
+            switch(status) {
+                case 'approved': return 'bi bi-check-circle';
+                case 'query_raised': return 'bi bi-question-circle';
+                default: return 'bi bi-calendar-check';
+            }
         }
 
         // Time ago helper
@@ -648,7 +857,7 @@
             
             // Generate calendar
             let calendarHTML = `
-                <div class="row border-bottom bg-light">
+                <div class="row border-bottom bg-glass">
                     <div class="col p-2 text-center fw-bold text-danger">Sun</div>
                     <div class="col p-2 text-center fw-bold">Mon</div>
                     <div class="col p-2 text-center fw-bold">Tue</div>
@@ -676,7 +885,7 @@
                     <div class="col p-2 calendar-day ${isToday ? 'today' : ''}">
                         <div class="d-flex justify-content-between">
                             <strong class="${isToday ? 'text-primary' : ''}">${day}</strong>
-                            ${daySchedules.length > 0 ? `<span class="badge bg-success">${daySchedules.length}</span>` : ''}
+                            ${daySchedules.length > 0 ? `<span class="badge badge-success">${daySchedules.length}</span>` : ''}
                         </div>
                         ${daySchedules.map(schedule => `
                             <div class="calendar-event mt-1">
