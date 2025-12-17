@@ -150,10 +150,11 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
-                // Store basic user info
+                // Store user info with profile picture
                 localStorage.setItem('userEmail', user.email);
                 localStorage.setItem('userName', user.displayName);
                 localStorage.setItem('userId', user.uid);
+                localStorage.setItem('userPhoto', user.photoURL || '');
                 
                 // Redirect to checking role page
                 window.location.href = 'checking-role.html';
@@ -184,6 +185,7 @@
                 localStorage.setItem('userEmail', user.email);
                 localStorage.setItem('userName', user.displayName);
                 localStorage.setItem('userId', user.uid);
+                localStorage.setItem('userPhoto', user.photoURL || '');
                 window.location.href = 'checking-role.html';
             }
         });
@@ -193,8 +195,8 @@
             const notification = document.createElement('div');
             notification.className = `notification fade-in`;
             notification.innerHTML = `
-                <div class="glass-icon ${type}">
-                    <i class="bi bi-${type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <div class="glass-icon" style="${getNotificationColor(type)}">
+                    <i class="bi ${getNotificationIcon(type)} text-white"></i>
                 </div>
                 <div class="flex-grow-1">
                     <p class="mb-0">${message}</p>
@@ -203,19 +205,14 @@
             `;
             
             // Add to notification area
-            const notificationArea = document.createElement('div');
-            notificationArea.id = 'notificationArea';
-            notificationArea.style.position = 'fixed';
-            notificationArea.style.top = '100px';
-            notificationArea.style.right = '20px';
-            notificationArea.style.zIndex = '1000';
-            notificationArea.style.maxWidth = '350px';
-            
-            if (!document.getElementById('notificationArea')) {
+            let notificationArea = document.getElementById('notificationArea');
+            if (!notificationArea) {
+                notificationArea = document.createElement('div');
+                notificationArea.id = 'notificationArea';
                 document.body.appendChild(notificationArea);
             }
             
-            document.getElementById('notificationArea').appendChild(notification);
+            notificationArea.appendChild(notification);
             
             // Auto remove after 5 seconds
             setTimeout(() => {
@@ -223,6 +220,24 @@
                     notification.remove();
                 }
             }, 5000);
+        }
+
+        function getNotificationColor(type) {
+            switch(type) {
+                case 'success': return 'background: linear-gradient(135deg, var(--accent-success), #059669);';
+                case 'warning': return 'background: linear-gradient(135deg, var(--accent-warning), #d97706);';
+                case 'danger': return 'background: linear-gradient(135deg, var(--accent-danger), #dc2626);';
+                default: return 'background: linear-gradient(135deg, var(--accent-info), #2563eb);';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'bi-check-circle-fill';
+                case 'warning': return 'bi-exclamation-triangle-fill';
+                case 'danger': return 'bi-x-circle-fill';
+                default: return 'bi-info-circle-fill';
+            }
         }
     </script>
 </body>
