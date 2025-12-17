@@ -38,7 +38,7 @@
             border-radius: 50%;
             background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05));
             bottom: -200px;
-            left: -200px;
+            left: -250px;
         }
     </style>
 </head>
@@ -171,6 +171,7 @@
                         await setDoc(doc(db, 'users', user.uid), {
                             email: user.email,
                             name: user.displayName,
+                            photoURL: user.photoURL || '',
                             role: 'admin',
                             createdAt: new Date().toISOString(),
                             lastLogin: new Date().toISOString()
@@ -190,6 +191,7 @@
                             // Update last login
                             await setDoc(doc(db, 'users', user.uid), {
                                 ...userData,
+                                photoURL: user.photoURL || userData.photoURL || '',
                                 lastLogin: new Date().toISOString()
                             }, { merge: true });
                             
@@ -203,6 +205,7 @@
                             await setDoc(doc(db, 'users', user.uid), {
                                 email: user.email,
                                 name: user.displayName,
+                                photoURL: user.photoURL || '',
                                 role: 'faculty',
                                 createdAt: new Date().toISOString(),
                                 lastLogin: new Date().toISOString()
@@ -252,8 +255,8 @@
             const notification = document.createElement('div');
             notification.className = `notification fade-in`;
             notification.innerHTML = `
-                <div class="glass-icon ${type}" style="background: ${type === 'danger' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
-                    <i class="bi bi-${type === 'danger' ? 'exclamation-triangle' : 'info-circle'} text-white"></i>
+                <div class="glass-icon" style="${getNotificationColor(type)}">
+                    <i class="bi ${getNotificationIcon(type)} text-white"></i>
                 </div>
                 <div class="flex-grow-1">
                     <p class="mb-0">${message}</p>
@@ -261,25 +264,38 @@
                 <button class="btn-close" onclick="this.parentElement.remove()"></button>
             `;
             
-            const notificationArea = document.createElement('div');
-            notificationArea.id = 'notificationArea';
-            notificationArea.style.position = 'fixed';
-            notificationArea.style.top = '100px';
-            notificationArea.style.right = '20px';
-            notificationArea.style.zIndex = '1000';
-            notificationArea.style.maxWidth = '350px';
-            
-            if (!document.getElementById('notificationArea')) {
+            let notificationArea = document.getElementById('notificationArea');
+            if (!notificationArea) {
+                notificationArea = document.createElement('div');
+                notificationArea.id = 'notificationArea';
                 document.body.appendChild(notificationArea);
             }
             
-            document.getElementById('notificationArea').appendChild(notification);
+            notificationArea.appendChild(notification);
             
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.remove();
                 }
             }, 5000);
+        }
+
+        function getNotificationColor(type) {
+            switch(type) {
+                case 'success': return 'background: linear-gradient(135deg, var(--accent-success), #059669);';
+                case 'warning': return 'background: linear-gradient(135deg, var(--accent-warning), #d97706);';
+                case 'danger': return 'background: linear-gradient(135deg, var(--accent-danger), #dc2626);';
+                default: return 'background: linear-gradient(135deg, var(--accent-info), #2563eb);';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'bi-check-circle-fill';
+                case 'warning': return 'bi-exclamation-triangle-fill';
+                case 'danger': return 'bi-x-circle-fill';
+                default: return 'bi-info-circle-fill';
+            }
         }
     </script>
 </body>
