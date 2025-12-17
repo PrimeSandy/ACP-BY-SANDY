@@ -8,65 +8,166 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .faculty-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+        /* Calendar Styles */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
         }
         
-        .quick-actions {
+        .calendar-grid {
             display: grid;
-            gap: 12px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .calendar-day-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
         
         .calendar-day {
-            min-height: 120px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
             background: var(--secondary-bg);
+            padding: 12px;
+            min-height: 100px;
+            border: 1px solid var(--border-color);
             transition: var(--transition);
             position: relative;
         }
         
+        .calendar-day:hover {
+            background: var(--glass-bg);
+        }
+        
         .calendar-day.today {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), transparent);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
             border-color: var(--accent-primary);
+        }
+        
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
         }
         
         .calendar-event {
             background: linear-gradient(135deg, var(--accent-success), #059669);
             color: white;
-            padding: 6px 10px;
-            border-radius: var(--radius-sm);
-            margin-top: 6px;
-            font-size: 0.85rem;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: var(--transition);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .calendar-event:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Activity Timeline */
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
             padding: 12px;
-            border-bottom: 1px solid var(--border-color);
+            background: var(--secondary-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
             transition: var(--transition);
         }
         
         .activity-item:hover {
-            background: var(--glass-bg);
             transform: translateX(5px);
+            background: var(--glass-bg);
         }
         
-        .schedule-actions {
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
-            gap: 10px;
-            margin-top: 16px;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        /* Stats Cards */
+        .stats-highlight {
+            animation: highlightPulse 2s ease-in-out;
+        }
+        
+        @keyframes highlightPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Responsive Calendar */
+        @media (max-width: 768px) {
+            .calendar-day {
+                min-height: 80px;
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+            
+            .calendar-event {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+            
+            .calendar-day-header {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .calendar-day {
+                min-height: 60px;
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            
+            .calendar-day-number {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -80,26 +181,39 @@
 
     <!-- Navigation -->
     <nav class="navbar glass">
-        <div class="container-fluid">
+        <div class="navbar-container">
+            <!-- Brand -->
             <a class="navbar-brand gradient-text" href="#">
                 <div class="glass-icon" style="background: linear-gradient(135deg, var(--accent-success), #059669);">
                     <i class="bi bi-person-circle text-white"></i>
                 </div>
-                Faculty Dashboard
+                <span class="d-none d-md-inline">Faculty Dashboard</span>
+                <span class="d-inline d-md-none">Faculty</span>
             </a>
-            <div class="d-flex align-items-center gap-3">
-                <div class="user-badge glass">
-                    <div class="user-avatar me-2" style="background: linear-gradient(135deg, var(--accent-success), #059669);">
-                        <i class="bi bi-person-fill"></i>
+            
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="bi bi-list"></i>
+            </button>
+            
+            <!-- Menu -->
+            <div class="navbar-collapse" id="navbarCollapse">
+                <div class="navbar-user">
+                    <div class="user-profile">
+                        <div class="profile-picture" id="userProfilePicture">
+                            <!-- Profile picture will be inserted by JavaScript -->
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name" id="facultyName">Loading...</div>
+                            <div class="user-role">
+                                <span class="badge badge-success">FACULTY</span>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="small" id="facultyName">Loading...</div>
-                        <div class="badge badge-success mt-1">FACULTY</div>
-                    </div>
+                    <button class="btn btn-outline btn-sm" id="logoutBtn">
+                        <i class="bi bi-box-arrow-right me-1"></i> <span class="d-none d-md-inline">Logout</span>
+                    </button>
                 </div>
-                <button class="btn btn-outline btn-sm" id="logoutBtn">
-                    <i class="bi bi-box-arrow-right me-1"></i> Logout
-                </button>
             </div>
         </div>
     </nav>
@@ -107,19 +221,86 @@
     <!-- Notification Area -->
     <div id="notificationArea"></div>
 
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass">
+                <div class="chat-modal-header" style="background: linear-gradient(135deg, var(--accent-success), #059669);">
+                    <i class="bi bi-chat-left-text"></i>
+                    <h6 class="mb-0">Schedule Discussion</h6>
+                </div>
+                <div class="modal-body chat-modal-body">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Chat messages will be loaded here -->
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="input-group">
+                            <input type="text" class="form-control glass-light" id="chatMessage" 
+                                   placeholder="Type your message...">
+                            <button class="btn btn-success" id="sendMessageBtn">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Query Modal -->
+    <div class="modal fade" id="queryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content glass">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title gradient-text">
+                        <i class="bi bi-question-circle me-2"></i>Raise Query
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="queryScheduleId">
+                    <div class="mb-4">
+                        <label class="form-label">Schedule Details</label>
+                        <div id="scheduleDetails" class="p-3 glass-light rounded">
+                            <div class="text-center">
+                                <div class="loading-spinner"></div>
+                                <p class="mt-2 mb-0">Loading schedule details...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Query Message</label>
+                        <textarea class="form-control glass-light" id="queryMessage" rows="4" 
+                                  placeholder="Describe the issue or conflict..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="submitQuery()">
+                        <i class="bi bi-send me-1"></i> Submit Query
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid mt-4">
         <div class="row">
             <!-- Sidebar Stats -->
             <div class="col-lg-3">
                 <!-- Stats -->
-                <div class="faculty-stats">
-                    <div class="stats-card glass hover-lift">
+                <div class="stats-container">
+                    <div class="stats-card glass hover-lift" id="pendingCard" onclick="filterSchedules('pending')">
                         <div class="stats-value" id="pendingCount">0</div>
                         <div class="stats-label">Pending Schedules</div>
                     </div>
-                    <div class="stats-card glass hover-lift">
+                    <div class="stats-card glass hover-lift" id="approvedCard" onclick="filterSchedules('approved')">
                         <div class="stats-value" id="approvedCount">0</div>
                         <div class="stats-label">Approved</div>
+                    </div>
+                    <div class="stats-card glass hover-lift" id="queryCard" onclick="filterSchedules('query_raised')">
+                        <div class="stats-value" id="queryCount">0</div>
+                        <div class="stats-label">Queries</div>
                     </div>
                 </div>
 
@@ -130,7 +311,7 @@
                         Quick Actions
                     </div>
                     <div class="card-body">
-                        <div class="quick-actions">
+                        <div class="d-grid gap-2">
                             <button class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#calendarModal">
                                 <i class="bi bi-calendar-month me-2"></i> View Calendar
                             </button>
@@ -151,7 +332,7 @@
                         Recent Activity
                     </div>
                     <div class="card-body p-0">
-                        <div id="recentActivity" style="max-height: 250px; overflow-y: auto;">
+                        <div id="recentActivity" class="activity-timeline p-3" style="max-height: 250px; overflow-y: auto;">
                             <div class="text-center py-4">
                                 <div class="loading-spinner"></div>
                             </div>
@@ -208,7 +389,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="calendar-header">
                         <button class="btn btn-outline" onclick="changeMonth(-1)">
                             <i class="bi bi-chevron-left"></i> Previous
                         </button>
@@ -217,46 +398,18 @@
                             Next <i class="bi bi-chevron-right"></i>
                         </button>
                     </div>
-                    <div id="calendar" class="calendar-grid">
-                        <!-- Calendar will be generated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Query Modal -->
-    <div class="modal fade" id="queryModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content glass">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title gradient-text">
-                        <i class="bi bi-question-circle me-2"></i>Raise Query
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="queryScheduleId">
-                    <div class="mb-4">
-                        <label class="form-label">Schedule Details</label>
-                        <div id="scheduleDetails" class="p-3 glass-light rounded">
-                            <div class="text-center">
-                                <div class="loading-spinner"></div>
-                                <p class="mt-2 mb-0">Loading schedule details...</p>
-                            </div>
+                    <div class="calendar-container">
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">Sun</div>
+                            <div class="calendar-day-header">Mon</div>
+                            <div class="calendar-day-header">Tue</div>
+                            <div class="calendar-day-header">Wed</div>
+                            <div class="calendar-day-header">Thu</div>
+                            <div class="calendar-day-header">Fri</div>
+                            <div class="calendar-day-header">Sat</div>
+                            <!-- Calendar days will be generated here -->
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Query Message</label>
-                        <textarea class="form-control glass-light" id="queryMessage" rows="4" 
-                                  placeholder="Describe the issue or conflict..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning" onclick="submitQuery()">
-                        <i class="bi bi-send me-1"></i> Submit Query
-                    </button>
                 </div>
             </div>
         </div>
@@ -330,16 +483,39 @@
             }, 2000);
         }
 
-        // Set faculty name
-        const facultyName = localStorage.getItem('userName') || 'Faculty';
-        document.getElementById('facultyName').textContent = facultyName;
+        // Mobile Navigation Toggle
+        const navbarToggle = document.getElementById('navbarToggle');
+        const navbarCollapse = document.getElementById('navbarCollapse');
+        
+        navbarToggle.addEventListener('click', () => {
+            navbarCollapse.classList.toggle('show');
+        });
 
-        // Global variables
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let approvedSchedules = [];
-        let unsubscribeSchedules = null;
-        let userId = localStorage.getItem('userId');
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!navbarToggle.contains(event.target) && !navbarCollapse.contains(event.target)) {
+                navbarCollapse.classList.remove('show');
+            }
+        });
+
+        // Set user profile
+        function setUserProfile() {
+            const facultyName = localStorage.getItem('userName') || 'Faculty';
+            const userPhoto = localStorage.getItem('userPhoto') || '';
+            const profilePicture = document.getElementById('userProfilePicture');
+            const nameElement = document.getElementById('facultyName');
+            
+            nameElement.textContent = facultyName;
+            
+            if (userPhoto) {
+                profilePicture.innerHTML = `<img src="${userPhoto}" alt="${facultyName}" onerror="this.parentElement.className='profile-picture fallback'; this.parentElement.innerHTML='${facultyName.charAt(0)}'">`;
+            } else {
+                profilePicture.className = 'profile-picture fallback';
+                profilePicture.textContent = facultyName.charAt(0).toUpperCase();
+            }
+        }
+
+        setUserProfile();
 
         // Show notification
         function showNotification(message, type = 'info', duration = 5000) {
@@ -367,6 +543,7 @@
             
             document.getElementById('notificationArea').appendChild(notification);
             
+            // Auto remove after duration
             setTimeout(() => {
                 const notif = document.getElementById(notificationId);
                 if (notif) notif.remove();
@@ -403,189 +580,114 @@
             }
         });
 
-        // Export functionality
-        document.getElementById('exportBtn')?.addEventListener('click', () => {
-            if (approvedSchedules.length === 0) {
-                showNotification('No approved schedules to export', 'warning');
-                return;
+        // Global variables
+        let allSchedules = [];
+        let approvedSchedules = [];
+        let activeFilter = 'all';
+        let userId = localStorage.getItem('userId');
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let currentChatScheduleId = null;
+        const chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+
+        // Clickable Stats Cards
+        function filterSchedules(filter) {
+            activeFilter = filter;
+            
+            // Update active card
+            document.querySelectorAll('.stats-card').forEach(card => {
+                card.classList.remove('active', 'stats-highlight');
+            });
+            
+            switch(filter) {
+                case 'pending':
+                    document.getElementById('pendingCard').classList.add('active', 'stats-highlight');
+                    document.getElementById('statusFilter').value = 'pending';
+                    break;
+                case 'approved':
+                    document.getElementById('approvedCard').classList.add('active', 'stats-highlight');
+                    document.getElementById('statusFilter').value = 'approved';
+                    break;
+                case 'query_raised':
+                    document.getElementById('queryCard').classList.add('active', 'stats-highlight');
+                    document.getElementById('statusFilter').value = 'query_raised';
+                    break;
             }
             
-            const csvContent = "Subject,Class,Date,Start Time,End Time\n" +
-                approvedSchedules.map(s => 
-                    `"${s.subject}","${s.className}","${s.date}","${s.startTime}","${s.endTime}"`
-                ).join("\n");
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `my-schedules-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showNotification('Schedule exported successfully!', 'success');
-        });
+            loadFilteredSchedules();
+        }
 
-        // Load schedules
-        function loadSchedules() {
+        // Load filtered schedules
+        function loadFilteredSchedules() {
+            const searchTerm = document.getElementById('searchSchedule')?.value?.toLowerCase() || '';
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            
             const container = document.getElementById('schedulesContainer');
+            container.innerHTML = '';
             
-            if (!userId) {
+            if (allSchedules.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-5">
-                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-danger), #dc2626); margin: 0 auto;">
-                            <i class="bi bi-person-x text-white"></i>
+                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); margin: 0 auto;">
+                            <i class="bi bi-calendar-x text-white"></i>
                         </div>
-                        <h5 class="mb-2">User not authenticated</h5>
-                        <p class="text-muted">Please log in again</p>
-                        <button class="btn btn-primary mt-2" onclick="window.location.href='index.html'">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
-                        </button>
+                        <h5 class="mb-2">No schedules assigned yet</h5>
+                        <p class="text-muted">Wait for admin to assign you schedules</p>
                     </div>
                 `;
                 return;
             }
-
-            if (unsubscribeSchedules) unsubscribeSchedules();
             
-            // SIMPLE query - just get all schedules
-            const q = collection(db, 'schedules');
+            let filteredSchedules = allSchedules.filter(schedule => {
+                // Apply search filter
+                if (searchTerm && !(
+                    schedule.subject.toLowerCase().includes(searchTerm) ||
+                    schedule.className.toLowerCase().includes(searchTerm)
+                )) {
+                    return false;
+                }
+                
+                // Apply status filter
+                if (statusFilter === 'pending') {
+                    return ['sent', 'delivered', 'viewed', 'query_raised'].includes(schedule.status);
+                } else if (statusFilter !== 'all') {
+                    return schedule.status === statusFilter;
+                }
+                
+                return true;
+            });
             
-            unsubscribeSchedules = onSnapshot(q, async (snapshot) => {
-                container.innerHTML = '';
-                let pending = 0;
-                let approved = 0;
-                approvedSchedules = [];
-                
-                if (snapshot.empty) {
-                    container.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); margin: 0 auto;">
-                                <i class="bi bi-calendar-x text-white"></i>
-                            </div>
-                            <h5 class="mb-2">No schedules assigned yet</h5>
-                            <p class="text-muted">Wait for admin to assign you schedules</p>
-                        </div>
-                    `;
-                    updateCounts(0, 0);
-                    updateRecentActivity([]);
-                    return;
-                }
-                
-                // Get all schedules and filter locally
-                const allSchedules = [];
-                
-                for (const docSnap of snapshot.docs) {
-                    const schedule = { id: docSnap.id, ...docSnap.data() };
-                    
-                    // Only show schedules for this faculty
-                    if (schedule.facultyId !== userId) {
-                        continue;
-                    }
-                    
-                    allSchedules.push(schedule);
-                    
-                    // Update delivered status for any 'sent' schedules
-                    if (schedule.status === 'sent') {
-                        try {
-                            await updateDoc(doc(db, 'schedules', schedule.id), { 
-                                status: 'delivered',
-                                updatedAt: new Date().toISOString()
-                            });
-                            schedule.status = 'delivered'; // Update local copy
-                        } catch (error) {
-                            console.error("Error updating status:", error);
-                        }
-                    }
-                    
-                    // Update counts
-                    if (schedule.status === 'approved') {
-                        approved++;
-                        approvedSchedules.push(schedule);
-                    } else if (['delivered', 'viewed', 'query_raised'].includes(schedule.status)) {
-                        pending++;
-                    }
-                }
-                
-                // Apply filters locally
-                const searchTerm = document.getElementById('searchSchedule')?.value?.toLowerCase() || '';
-                const statusFilter = document.getElementById('statusFilter')?.value || 'all';
-                
-                let filteredSchedules = allSchedules.filter(schedule => {
-                    // Apply search filter
-                    if (searchTerm && !(
-                        schedule.subject.toLowerCase().includes(searchTerm) ||
-                        schedule.className.toLowerCase().includes(searchTerm)
-                    )) {
-                        return false;
-                    }
-                    
-                    // Apply status filter
-                    if (statusFilter === 'pending') {
-                        return ['sent', 'delivered', 'viewed', 'query_raised'].includes(schedule.status);
-                    } else if (statusFilter === 'approved') {
-                        return schedule.status === 'approved';
-                    } else if (statusFilter === 'query_raised') {
-                        return schedule.status === 'query_raised';
-                    }
-                    
-                    return true;
-                });
-                
-                // Sort by date and time
-                filteredSchedules.sort((a, b) => {
-                    const dateCompare = b.date.localeCompare(a.date);
-                    if (dateCompare !== 0) return dateCompare;
-                    return b.startTime.localeCompare(a.startTime);
-                });
-                
-                // Display schedules
-                if (filteredSchedules.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-info), #2563eb); margin: 0 auto;">
-                                <i class="bi bi-search text-white"></i>
-                            </div>
-                            <h5 class="mb-2">No matching schedules found</h5>
-                            <p class="text-muted">Try changing your search or filter</p>
-                        </div>
-                    `;
-                } else {
-                    filteredSchedules.forEach(schedule => {
-                        const scheduleDiv = createScheduleCard(schedule);
-                        container.appendChild(scheduleDiv);
-                    });
-                }
-                
-                updateCounts(pending, approved);
-                updateRecentActivity(allSchedules);
-                
-            }, (error) => {
-                console.error("Error loading schedules:", error);
+            if (filteredSchedules.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-5">
-                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-danger), #dc2626); margin: 0 auto;">
-                            <i class="bi bi-exclamation-triangle text-white"></i>
+                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-info), #2563eb); margin: 0 auto;">
+                            <i class="bi bi-search text-white"></i>
                         </div>
-                        <h5 class="mt-3">Error loading schedules</h5>
-                        <p class="text-muted">${error.message}</p>
-                        <button class="btn btn-primary mt-2" onclick="loadSchedules()">
-                            <i class="bi bi-arrow-clockwise me-1"></i> Retry
-                        </button>
+                        <h5 class="mb-2">No matching schedules found</h5>
+                        <p class="text-muted">Try changing your search or filter</p>
                     </div>
                 `;
-                showNotification('Error loading schedules: ' + error.message, 'danger');
+                return;
+            }
+            
+            // Sort by date and time
+            filteredSchedules.sort((a, b) => {
+                const dateCompare = b.date.localeCompare(a.date);
+                if (dateCompare !== 0) return dateCompare;
+                return b.startTime.localeCompare(a.startTime);
+            });
+            
+            filteredSchedules.forEach(schedule => {
+                const scheduleDiv = createScheduleCard(schedule);
+                container.appendChild(scheduleDiv);
             });
         }
 
-        // Create schedule card
+        // Create schedule card with chat button
         function createScheduleCard(schedule) {
             const scheduleDiv = document.createElement('div');
             scheduleDiv.className = `schedule-card glass fade-in ${schedule.status === 'approved' ? 'approved' : ''} ${schedule.status === 'query_raised' ? 'query' : ''}`;
             
-            // Status display
             const statusInfo = {
                 sent: { icon: '📤', text: 'Sent', color: 'badge-sent' },
                 delivered: { icon: '📥', text: 'Delivered', color: 'badge-delivered' },
@@ -604,7 +706,7 @@
                         <p class="mb-1"><strong>Date:</strong> ${schedule.date}</p>
                         <p class="mb-1">
                             <strong>Time:</strong> 
-                            <span class="badge glass-light ms-1">${schedule.startTime} - ${schedule.endTime}</span>
+                            <span class="time-display ms-1">${schedule.startTime} - ${schedule.endTime}</span>
                         </p>
                         <p class="mb-0">
                             <strong>Status:</strong> 
@@ -613,13 +715,20 @@
                             </span>
                         </p>
                     </div>
+                    <div class="text-end">
+                        <small class="text-muted">Created: ${new Date(schedule.createdAt).toLocaleDateString()}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline" onclick="openChat('${schedule.id}')">
+                                <i class="bi bi-chat-left"></i> Chat
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                
                 ${schedule.queries && schedule.queries.length > 0 ? `
                     <div class="mt-3 border-top pt-3">
                         <h6><i class="bi bi-chat-left-text me-2 gradient-text"></i>Discussion</h6>
                         <div class="mt-2">
-                            ${schedule.queries.map((q, index) => `
+                            ${schedule.queries.slice(-2).map((q, index) => `
                                 <div class="query-bubble ${q.sender === 'faculty' ? 'faculty' : 'admin'} mb-2">
                                     <div class="d-flex justify-content-between mb-1">
                                         <strong>${q.sender === 'faculty' ? 'You' : 'Admin'}</strong>
@@ -634,7 +743,6 @@
                         </div>
                     </div>
                 ` : ''}
-                
                 <div class="mt-3">
                     ${schedule.status === 'approved' ? `
                         <div class="d-flex align-items-center text-success">
@@ -651,7 +759,7 @@
                             <span>Waiting for admin response</span>
                         </div>
                     ` : `
-                        <div class="schedule-actions">
+                        <div class="d-flex gap-2">
                             <button class="btn btn-success" onclick="approveSchedule('${schedule.id}')">
                                 <i class="bi bi-check-lg me-1"></i> Approve
                             </button>
@@ -666,10 +774,175 @@
             return scheduleDiv;
         }
 
-        // Update counts
-        function updateCounts(pending, approved) {
-            document.getElementById('pendingCount').textContent = pending;
-            document.getElementById('approvedCount').textContent = approved;
+        // Open chat for a schedule
+        window.openChat = async function(scheduleId) {
+            currentChatScheduleId = scheduleId;
+            const schedule = allSchedules.find(s => s.id === scheduleId);
+            
+            if (!schedule) return;
+            
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="text-center py-5">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-2 text-muted">Loading chat...</p>
+                </div>
+            `;
+            
+            // Load chat messages
+            setTimeout(() => {
+                loadChatMessages(schedule);
+            }, 500);
+            
+            chatModal.show();
+        };
+
+        function loadChatMessages(schedule) {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            if (!schedule.queries || schedule.queries.length === 0) {
+                chatMessages.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="glass-icon mb-3" style="background: linear-gradient(135deg, var(--accent-success), #059669); margin: 0 auto;">
+                            <i class="bi bi-chat-left-text text-white"></i>
+                        </div>
+                        <h6 class="mb-2">Start a conversation</h6>
+                        <p class="text-muted">No messages yet. Send the first message!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            schedule.queries.forEach((message, index) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.sender === 'faculty' ? 'sent' : 'received'} fade-in`;
+                messageDiv.style.animationDelay = `${index * 0.1}s`;
+                
+                const senderName = message.sender === 'faculty' ? 'You' : 'Admin';
+                const time = new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                messageDiv.innerHTML = `
+                    <div class="message-sender">${senderName}</div>
+                    <div class="message-content">${message.message}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Send chat message
+        document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+            const messageInput = document.getElementById('chatMessage');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentChatScheduleId) return;
+            
+            try {
+                const scheduleRef = doc(db, 'schedules', currentChatScheduleId);
+                const scheduleDoc = await getDoc(scheduleRef);
+                const schedule = scheduleDoc.data();
+                
+                const queries = schedule.queries || [];
+                queries.push({
+                    message: message,
+                    sender: 'faculty',
+                    timestamp: new Date().toISOString()
+                });
+                
+                await updateDoc(scheduleRef, {
+                    queries: queries,
+                    status: 'query_raised',
+                    updatedAt: new Date().toISOString()
+                });
+                
+                messageInput.value = '';
+                
+                // Reload chat
+                const updatedSchedule = allSchedules.find(s => s.id === currentChatScheduleId);
+                if (updatedSchedule) {
+                    updatedSchedule.queries = queries;
+                    updatedSchedule.status = 'query_raised';
+                    loadChatMessages(updatedSchedule);
+                }
+                
+                showNotification('Message sent successfully!', 'success');
+                
+            } catch (error) {
+                console.error("Error sending message:", error);
+                showNotification('Failed to send message', 'danger');
+            }
+        });
+
+        // Load all schedules
+        function loadAllSchedules() {
+            const q = collection(db, 'schedules');
+            
+            onSnapshot(q, async (snapshot) => {
+                allSchedules = [];
+                approvedSchedules = [];
+                let pendingCount = 0;
+                let approvedCount = 0;
+                let queryCount = 0;
+                
+                for (const docSnap of snapshot.docs) {
+                    const schedule = { id: docSnap.id, ...docSnap.data() };
+                    
+                    // Only show schedules for this faculty
+                    if (schedule.facultyId !== userId) {
+                        continue;
+                    }
+                    
+                    allSchedules.push(schedule);
+                    
+                    // Update delivered status for any 'sent' schedules
+                    if (schedule.status === 'sent') {
+                        try {
+                            await updateDoc(doc(db, 'schedules', schedule.id), { 
+                                status: 'delivered',
+                                updatedAt: new Date().toISOString()
+                            });
+                            schedule.status = 'delivered';
+                        } catch (error) {
+                            console.error("Error updating status:", error);
+                        }
+                    }
+                    
+                    // Update counts
+                    if (schedule.status === 'approved') {
+                        approvedCount++;
+                        approvedSchedules.push(schedule);
+                    } else if (schedule.status === 'query_raised') {
+                        queryCount++;
+                        pendingCount++;
+                    } else if (['sent', 'delivered', 'viewed'].includes(schedule.status)) {
+                        pendingCount++;
+                    }
+                }
+                
+                // Update stats
+                document.getElementById('pendingCount').textContent = pendingCount;
+                document.getElementById('approvedCount').textContent = approvedCount;
+                document.getElementById('queryCount').textContent = queryCount;
+                
+                // Update filtered view
+                loadFilteredSchedules();
+                
+                // Update recent activity
+                updateRecentActivity(allSchedules);
+                
+                // Update calendar if modal is open
+                if (document.getElementById('calendarModal').classList.contains('show')) {
+                    generateCalendar(currentMonth, currentYear);
+                }
+                
+            }, (error) => {
+                console.error("Error loading schedules:", error);
+                showNotification('Error loading schedules: ' + error.message, 'danger');
+            });
         }
 
         // Update recent activity
@@ -689,52 +962,60 @@
                 return;
             }
             
-            // Take last 5 activities
-            const recent = schedules.slice(-5).reverse();
+            // Get recent activities (last 5)
+            const recentActivities = [];
             
-            recent.forEach(schedule => {
-                const activityItem = document.createElement('div');
-                activityItem.className = 'activity-item';
-                const timeAgo = getTimeAgo(new Date(schedule.updatedAt || schedule.createdAt));
-                const statusIcon = schedule.status === 'approved' ? '✅' : 
-                                 schedule.status === 'query_raised' ? '❓' : '📋';
+            schedules.forEach(schedule => {
+                if (schedule.updatedAt) {
+                    recentActivities.push({
+                        time: new Date(schedule.updatedAt),
+                        title: schedule.subject,
+                        status: schedule.status,
+                        type: 'schedule_update'
+                    });
+                }
                 
+                // Add query activities
+                if (schedule.queries && schedule.queries.length > 0) {
+                    const lastQuery = schedule.queries[schedule.queries.length - 1];
+                    recentActivities.push({
+                        time: new Date(lastQuery.timestamp),
+                        title: `${lastQuery.sender === 'faculty' ? 'You' : 'Admin'}: ${lastQuery.message.substring(0, 30)}...`,
+                        status: 'chat',
+                        type: 'chat_message'
+                    });
+                }
+            });
+            
+            // Sort by time (newest first) and take last 5
+            recentActivities.sort((a, b) => b.time - a.time);
+            const recent = recentActivities.slice(0, 5);
+            
+            recent.forEach(activity => {
+                const timeAgo = getTimeAgo(activity.time);
+                const iconClass = activity.type === 'chat_message' ? 'bi-chat-left' : 'bi-calendar-check';
+                const iconColor = activity.status === 'approved' ? 
+                    'background: linear-gradient(135deg, var(--accent-success), #059669);' :
+                    activity.status === 'query_raised' ?
+                    'background: linear-gradient(135deg, var(--accent-warning), #d97706);' :
+                    'background: linear-gradient(135deg, var(--accent-info), #2563eb);';
+                
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item fade-in';
                 activityItem.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <div class="glass-icon me-3" style="background: ${getActivityColor(schedule.status)};">
-                            <i class="${getActivityIcon(schedule.status)} text-white"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between">
-                                <strong class="text-truncate" style="max-width: 70%;">${schedule.subject}</strong>
-                                <small class="text-muted">${statusIcon}</small>
-                            </div>
-                            <div class="small text-muted">${schedule.className}</div>
-                            <small class="text-muted">${timeAgo}</small>
-                        </div>
+                    <div class="activity-icon" style="${iconColor}">
+                        <i class="bi ${iconClass} text-white"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="small">${activity.title}</div>
+                        <div class="activity-time">${timeAgo}</div>
                     </div>
                 `;
+                
                 activityDiv.appendChild(activityItem);
             });
         }
 
-        function getActivityColor(status) {
-            switch(status) {
-                case 'approved': return 'linear-gradient(135deg, var(--accent-success), #059669)';
-                case 'query_raised': return 'linear-gradient(135deg, var(--accent-warning), #d97706)';
-                default: return 'linear-gradient(135deg, var(--accent-info), #2563eb)';
-            }
-        }
-
-        function getActivityIcon(status) {
-            switch(status) {
-                case 'approved': return 'bi bi-check-circle';
-                case 'query_raised': return 'bi bi-question-circle';
-                default: return 'bi bi-calendar-check';
-            }
-        }
-
-        // Time ago helper
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
             if (seconds < 60) return "just now";
@@ -843,11 +1124,18 @@
 
         // Calendar functions
         function generateCalendar(month, year) {
-            const calendarDiv = document.getElementById('calendar');
+            const calendarGrid = document.querySelector('#calendarModal .calendar-grid');
+            if (!calendarGrid) return;
+            
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                                'July', 'August', 'September', 'October', 'November', 'December'];
             
             document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+            
+            // Clear existing days (keep headers)
+            while (calendarGrid.children.length > 7) {
+                calendarGrid.removeChild(calendarGrid.lastChild);
+            }
             
             // Get first day of month and total days
             const firstDay = new Date(year, month, 1);
@@ -855,63 +1143,33 @@
             const totalDays = lastDay.getDate();
             const startingDay = firstDay.getDay();
             
-            // Generate calendar
-            let calendarHTML = `
-                <div class="row border-bottom bg-glass">
-                    <div class="col p-2 text-center fw-bold text-danger">Sun</div>
-                    <div class="col p-2 text-center fw-bold">Mon</div>
-                    <div class="col p-2 text-center fw-bold">Tue</div>
-                    <div class="col p-2 text-center fw-bold">Wed</div>
-                    <div class="col p-2 text-center fw-bold">Thu</div>
-                    <div class="col p-2 text-center fw-bold">Fri</div>
-                    <div class="col p-2 text-center fw-bold text-primary">Sat</div>
-                </div>
-                <div class="row">
-            `;
-            
             // Empty cells for days before first day
             for (let i = 0; i < startingDay; i++) {
-                calendarHTML += '<div class="col p-2 calendar-day"></div>';
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarGrid.appendChild(emptyDay);
             }
             
             // Days of the month
             const today = new Date();
             for (let day = 1; day <= totalDays; day++) {
+                const dayElement = document.createElement('div');
                 const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                 const daySchedules = approvedSchedules.filter(s => s.date === dateStr);
                 const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
                 
-                calendarHTML += `
-                    <div class="col p-2 calendar-day ${isToday ? 'today' : ''}">
-                        <div class="d-flex justify-content-between">
-                            <strong class="${isToday ? 'text-primary' : ''}">${day}</strong>
-                            ${daySchedules.length > 0 ? `<span class="badge badge-success">${daySchedules.length}</span>` : ''}
+                dayElement.className = `calendar-day ${isToday ? 'today' : ''}`;
+                dayElement.innerHTML = `
+                    <span class="calendar-day-number">${day}</span>
+                    ${daySchedules.map(schedule => `
+                        <div class="calendar-event" title="${schedule.subject} (${schedule.startTime}-${schedule.endTime})">
+                            ${schedule.subject.substring(0, 10)}...
                         </div>
-                        ${daySchedules.map(schedule => `
-                            <div class="calendar-event mt-1">
-                                <div class="fw-bold small">${schedule.subject}</div>
-                                <div class="text-muted x-small">${schedule.startTime}-${schedule.endTime}</div>
-                            </div>
-                        `).join('')}
-                    </div>
+                    `).join('')}
                 `;
                 
-                // New row after Saturday
-                if ((startingDay + day) % 7 === 0 && day !== totalDays) {
-                    calendarHTML += '</div><div class="row">';
-                }
+                calendarGrid.appendChild(dayElement);
             }
-            
-            // Empty cells for remaining days
-            const totalCells = startingDay + totalDays;
-            const remainingCells = 42 - totalCells;
-            
-            for (let i = 0; i < remainingCells; i++) {
-                calendarHTML += '<div class="col p-2 calendar-day"></div>';
-            }
-            
-            calendarHTML += '</div>';
-            calendarDiv.innerHTML = calendarHTML;
         }
 
         window.changeMonth = function(delta) {
@@ -933,22 +1191,47 @@
             generateCalendar(currentMonth, currentYear);
         });
 
-        // Search and filter
-        document.getElementById('searchSchedule')?.addEventListener('input', loadSchedules);
-        document.getElementById('statusFilter')?.addEventListener('change', loadSchedules);
+        // Export functionality
+        document.getElementById('exportBtn')?.addEventListener('click', () => {
+            if (approvedSchedules.length === 0) {
+                showNotification('No approved schedules to export', 'warning');
+                return;
+            }
+            
+            const csvContent = "Subject,Class,Date,Start Time,End Time\n" +
+                approvedSchedules.map(s => 
+                    `"${s.subject}","${s.className}","${s.date}","${s.startTime}","${s.endTime}"`
+                ).join("\n");
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `my-schedules-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('Schedule exported successfully!', 'success');
+        });
 
         // Refresh schedules
         window.refreshSchedules = function() {
-            loadSchedules();
+            loadAllSchedules();
             showNotification('Schedules refreshed', 'info', 2000);
         };
 
+        // Search and filter events
+        document.getElementById('searchSchedule')?.addEventListener('input', loadFilteredSchedules);
+        document.getElementById('statusFilter')?.addEventListener('change', loadFilteredSchedules);
+
         // Initialize
-        loadSchedules();
+        loadAllSchedules();
         
         // Auto refresh every 30 seconds
         setInterval(() => {
-            loadSchedules();
+            loadAllSchedules();
         }, 30000);
     </script>
 </body>
